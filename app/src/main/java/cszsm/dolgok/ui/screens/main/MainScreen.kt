@@ -10,18 +10,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 
-@Preview
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onNavigateToLazyColumn: () -> Unit,
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
         Button(
-            onClick = { },
+            onClick = { onNavigateToLazyColumn() },
             modifier = Modifier.wrapContentSize()
         ) {
             Text(text = "LazyColumn")
         }
     }
+}
+
+@Preview
+@Composable
+fun MainScreenPreview() {
+    MainScreen(onNavigateToLazyColumn = {})
 }
