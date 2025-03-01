@@ -1,0 +1,26 @@
+package cszsm.dolgok.data
+
+import android.util.Log
+import cszsm.dolgok.data.dto.ForecastResponse
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.get
+
+class WeatherServiceImpl(
+    private val client: HttpClient,
+) : WeatherService {
+
+    override suspend fun getForecast(): ForecastResponse? {
+        return try {
+            client.get(HttpRoutes.FORECAST).body()
+        } catch (e: ResponseException) {
+            Log.e(TAG, e.response.status.description)
+            null
+        }
+    }
+
+    private companion object {
+        val TAG = WeatherServiceImpl::class.simpleName
+    }
+}
