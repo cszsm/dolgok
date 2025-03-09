@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import cszsm.dolgok.data.WeatherService
 import cszsm.dolgok.ui.screens.lazycolumn.LazyColumnScreen
 import cszsm.dolgok.ui.screens.main.MainScreen
-import cszsm.dolgok.ui.screens.weather.ForecastScreen
+import cszsm.dolgok.ui.screens.forecast.ForecastScreen
 import cszsm.dolgok.ui.theme.DolgokTheme
 import kotlinx.serialization.Serializable
 

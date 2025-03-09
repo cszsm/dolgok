@@ -1,4 +1,4 @@
-package cszsm.dolgok.ui.screens.weather
+package cszsm.dolgok.ui.screens.forecast
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
