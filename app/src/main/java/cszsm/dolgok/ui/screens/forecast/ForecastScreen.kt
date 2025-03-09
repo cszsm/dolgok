@@ -14,25 +14,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import cszsm.dolgok.data.WeatherService
-import cszsm.dolgok.data.dto.ForecastResponse
+import cszsm.dolgok.domain.usecases.GetForecast
+import cszsm.dolgok.domain.dto.Forecast
 import kotlinx.coroutines.launch
 
 @Composable
 fun ForecastScreen(
-    weatherService: WeatherService,
+    getForecast: GetForecast,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
         val scope = rememberCoroutineScope()
-        var forecast by remember { mutableStateOf<ForecastResponse?>(null) }
+        var forecast by remember { mutableStateOf<Forecast?>(null) }
 
         LaunchedEffect(true) {
             scope.launch {
                 forecast = try {
-                    weatherService.getForecast()
+                    getForecast()
                 } catch (e: Exception) {
                     Log.e("ForecastScreen", e.localizedMessage ?: "unknown error")
                     null
@@ -44,8 +44,10 @@ fun ForecastScreen(
             Text(text = "Loading")
         } else {
             Column {
-                forecast?.hourly?.time?.forEachIndexed { index, time ->
-                    Text("$time - ${forecast?.hourly?.temperature_2m?.getOrNull(index)}")
+                forecast?.hourly?.forEach {
+                    val time = it.time?.time.toString()
+                    val temperature = it.temperature
+                    Text("$time - $temperature")
                 }
             }
         }
