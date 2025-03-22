@@ -6,23 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import cszsm.dolgok.data.WeatherService
-import cszsm.dolgok.domain.transformers.ForecastTransformer
-import cszsm.dolgok.domain.usecases.GetForecast
+import cszsm.dolgok.ui.screens.forecast.ForecastScreen
 import cszsm.dolgok.ui.screens.lazycolumn.LazyColumnScreen
 import cszsm.dolgok.ui.screens.main.MainScreen
-import cszsm.dolgok.ui.screens.forecast.ForecastScreen
 import cszsm.dolgok.ui.theme.DolgokTheme
 import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
-
-    private val weatherService = WeatherService.create()
-    private val forecastTransformer = ForecastTransformer()
-    private val getForecastUseCase = GetForecast(
-        weatherService = weatherService,
-        forecastTransformer = forecastTransformer,
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +39,7 @@ class MainActivity : ComponentActivity() {
                             })
                     }
                     composable<LazyColumn> { LazyColumnScreen() }
-                    composable<Forecast> { ForecastScreen(getForecast = getForecastUseCase) }
+                    composable<Forecast> { ForecastScreen() }
                 }
             }
         }

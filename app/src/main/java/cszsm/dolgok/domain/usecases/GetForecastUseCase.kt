@@ -3,7 +3,7 @@ package cszsm.dolgok.domain.usecases
 import cszsm.dolgok.data.WeatherService
 import cszsm.dolgok.domain.transformers.ForecastTransformer
 
-class GetForecast(
+class GetForecastUseCase(
     private val weatherService: WeatherService,
     private val forecastTransformer: ForecastTransformer,
 ) {

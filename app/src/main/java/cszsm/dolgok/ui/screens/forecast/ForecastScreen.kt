@@ -14,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import cszsm.dolgok.domain.usecases.GetForecast
 import cszsm.dolgok.domain.dto.Forecast
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ForecastScreen(
-    getForecast: GetForecast,
+    viewModel: ForecastViewModel = koinViewModel()
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -32,7 +32,7 @@ fun ForecastScreen(
         LaunchedEffect(true) {
             scope.launch {
                 forecast = try {
-                    getForecast()
+                    viewModel.getForecast()
                 } catch (e: Exception) {
                     Log.e("ForecastScreen", e.localizedMessage ?: "unknown error")
                     null
