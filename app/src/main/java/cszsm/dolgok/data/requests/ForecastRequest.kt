@@ -1,13 +1,15 @@
 package cszsm.dolgok.data.requests
 
 import io.ktor.resources.Resource
+import kotlinx.datetime.LocalDateTime
 
 @Suppress("PropertyName", "unused")
 @Resource("/forecast")
 class ForecastRequest(
-    val latitude: String = "47.50",
-    val longitude: String = "19.04",
+    val latitude: Float,
+    val longitude: Float,
     val timezone: String = "auto",
     val hourly: String = "temperature_2m",
-    val forecast_days: String = "1",
+    val start_hour: LocalDateTime,
+    val end_hour: LocalDateTime,
 )

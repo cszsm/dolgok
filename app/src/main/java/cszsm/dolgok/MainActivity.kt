@@ -47,10 +47,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Serializable
-object Main
+private object Main
 
 @Serializable
-object LazyColumn
+private object LazyColumn
 
 @Serializable
-object Forecast
+private object Forecast

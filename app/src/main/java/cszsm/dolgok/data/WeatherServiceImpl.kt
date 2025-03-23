@@ -7,14 +7,27 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.resources.get
+import kotlinx.datetime.LocalDateTime
 
 class WeatherServiceImpl(
     private val client: HttpClient,
 ) : WeatherService {
 
-    override suspend fun getForecast(): ForecastResponse? {
+    override suspend fun getForecast(
+        latitude: Float,
+        longitude: Float,
+        startHour: LocalDateTime,
+        endHour: LocalDateTime,
+    ): ForecastResponse? {
         return try {
-            client.get(ForecastRequest()).body()
+            client.get(
+                ForecastRequest(
+                    latitude = latitude,
+                    longitude = longitude,
+                    start_hour = startHour,
+                    end_hour = endHour,
+                )
+            ).body()
         } catch (e: ResponseException) {
             Log.e(TAG, e.response.status.description)
             null

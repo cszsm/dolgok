@@ -20,7 +20,10 @@ class ForecastViewModel(
     fun loadForecast() {
         viewModelScope.launch {
             try {
-                val forecast = getForecastUseCase()
+                val forecast = getForecastUseCase(
+                    latitude = LATITUDE,
+                    longitude = LONGITUDE,
+                )
                 _state.update { state ->
                     state.copy(forecast = forecast)
                 }
@@ -28,5 +31,10 @@ class ForecastViewModel(
                 Log.e(ForecastViewModel::class.simpleName, e.localizedMessage ?: "unknown error")
             }
         }
+    }
+
+    private companion object {
+        const val LATITUDE: Float = 47.50f
+        const val LONGITUDE: Float = 19.04f
     }
 }

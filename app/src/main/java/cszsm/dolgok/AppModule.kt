@@ -3,6 +3,7 @@ package cszsm.dolgok
 import cszsm.dolgok.data.WeatherService
 import cszsm.dolgok.data.WeatherServiceImpl
 import cszsm.dolgok.domain.transformers.ForecastTransformer
+import cszsm.dolgok.domain.usecases.CalculateForecastDayIntervalUseCase
 import cszsm.dolgok.domain.usecases.GetForecastUseCase
 import cszsm.dolgok.ui.screens.forecast.ForecastViewModel
 import io.ktor.client.HttpClient
@@ -36,6 +37,7 @@ val appModule = module {
     }
     singleOf(::ForecastTransformer)
     singleOf(::GetForecastUseCase)
+    singleOf(::CalculateForecastDayIntervalUseCase)
     viewModelOf(::ForecastViewModel)
 }
 
