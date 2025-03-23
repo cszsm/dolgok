@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import cszsm.dolgok.domain.dto.Forecast
 import cszsm.dolgok.domain.dto.ForecastUnit
 import cszsm.dolgok.ui.theme.Typography
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import org.koin.androidx.compose.koinViewModel
 
@@ -63,12 +64,17 @@ private fun ForecastContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(12.dp),
         ) {
+            val currentDayOfWeek = forecast.hourly.firstOrNull()?.time?.dayOfWeek
+                ?: return@LazyColumn
+
             forecast.hourly.forEach {
                 val time = it.time?.time.toString()
+                val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
                 val temperature = it.temperature.toString()
                 item {
                     TemperatureItem(
                         time = time,
+                        day = day,
                         temperature = temperature,
                     )
                 }
@@ -81,6 +87,7 @@ private fun ForecastContent(
 @Composable
 private fun TemperatureItem(
     time: String = "11:00",
+    day: String = "monday",
     temperature: String = "10.1",
 ) {
     OutlinedCard(
@@ -95,6 +102,13 @@ private fun TemperatureItem(
             Text(
                 text = time,
                 style = Typography.headlineSmall,
+                modifier = Modifier
+                    .padding(12.dp)
+            )
+            Text(
+                text = day,
+                style = Typography.headlineSmall,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(12.dp)
             )
@@ -120,14 +134,26 @@ private fun TemperatureItem(
 private fun ForecastContent_Preview() {
     val forecast = Forecast(
         hourly = listOf(
-            ForecastUnit(time = getHour(hour = 8), temperature = 11f),
-            ForecastUnit(time = getHour(hour = 9), temperature = 12f),
-            ForecastUnit(time = getHour(hour = 10), temperature = 14f),
-            ForecastUnit(time = getHour(hour = 11), temperature = 17f),
+            ForecastUnit(time = getPreviewTime(dayOfMonth = 22, hour = 22), temperature = 11.4f),
+            ForecastUnit(time = getPreviewTime(dayOfMonth = 22, hour = 23), temperature = 11.7f),
+            ForecastUnit(time = getPreviewTime(dayOfMonth = 23, hour = 0), temperature = 10.2f),
+            ForecastUnit(time = getPreviewTime(dayOfMonth = 23, hour = 1), temperature = 9.9f),
         )
     )
     ForecastContent(forecast = forecast)
 }
 
-private fun getHour(hour: Int) =
-    LocalDateTime(year = 2025, monthNumber = 3, dayOfMonth = 22, hour = hour, minute = 0)
+private fun getPreviewTime(dayOfMonth: Int, hour: Int) =
+    LocalDateTime(year = 2025, monthNumber = 3, dayOfMonth = dayOfMonth, hour = hour, minute = 0)
+
+private fun ForecastUnit.getDayLabel(
+    currentDayOfWeek: DayOfWeek,
+): String {
+    val forecastDayOfWeek = time?.dayOfWeek
+
+    return if (forecastDayOfWeek != currentDayOfWeek) {
+        forecastDayOfWeek.toString().lowercase()
+    } else {
+        ""
+    }
+}
