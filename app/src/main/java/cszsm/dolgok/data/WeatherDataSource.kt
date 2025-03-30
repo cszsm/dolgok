@@ -1,14 +1,14 @@
 package cszsm.dolgok.data
 
-import cszsm.dolgok.data.dto.ForecastResponse
+import cszsm.dolgok.data.dto.ForecastApiModel
 import kotlinx.datetime.LocalDateTime
 
-interface WeatherService {
+interface WeatherDataSource {
 
     suspend fun getForecast(
         latitude: Float,
         longitude: Float,
         startHour: LocalDateTime,
         endHour: LocalDateTime,
-    ): ForecastResponse?
+    ): ForecastApiModel?
 }

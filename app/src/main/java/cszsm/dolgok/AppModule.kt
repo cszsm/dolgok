@@ -1,7 +1,8 @@
 package cszsm.dolgok
 
-import cszsm.dolgok.data.WeatherService
-import cszsm.dolgok.data.WeatherServiceImpl
+import cszsm.dolgok.data.ForecastRepository
+import cszsm.dolgok.data.WeatherDataSource
+import cszsm.dolgok.data.WeatherDataSourceImpl
 import cszsm.dolgok.domain.transformers.ForecastTransformer
 import cszsm.dolgok.domain.usecases.CalculateForecastDayIntervalUseCase
 import cszsm.dolgok.domain.usecases.GetForecastUseCase
@@ -23,8 +24,8 @@ import org.koin.dsl.module
 private const val WEATHER_BASE_URL = "api.open-meteo.com/v1/"
 
 val appModule = module {
-    single<WeatherService> {
-        WeatherServiceImpl(
+    single<WeatherDataSource> {
+        WeatherDataSourceImpl(
             client = HttpClient(OkHttp) {
                 common()
 
@@ -35,6 +36,7 @@ val appModule = module {
             }
         )
     }
+    singleOf(::ForecastRepository)
     singleOf(::ForecastTransformer)
     singleOf(::GetForecastUseCase)
     singleOf(::CalculateForecastDayIntervalUseCase)

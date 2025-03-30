@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 // TODO: check how fields can be optional
 @Serializable
-data class ForecastResponse(
-    val hourly: TimeTemperatureResponse,
+data class ForecastApiModel(
+    val hourly: TimeTemperatureApiModel,
 )
 
 @Serializable
-data class TimeTemperatureResponse(
+data class TimeTemperatureApiModel(
     val time: List<String>,
     val temperature_2m: List<Float>,
 )

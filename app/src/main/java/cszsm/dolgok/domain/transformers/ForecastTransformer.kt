@@ -1,14 +1,14 @@
 package cszsm.dolgok.domain.transformers
 
-import cszsm.dolgok.data.dto.ForecastResponse
-import cszsm.dolgok.data.dto.TimeTemperatureResponse
+import cszsm.dolgok.data.dto.ForecastApiModel
+import cszsm.dolgok.data.dto.TimeTemperatureApiModel
 import cszsm.dolgok.domain.dto.Forecast
 import cszsm.dolgok.domain.dto.ForecastUnit
 import kotlinx.datetime.LocalDateTime
 
 class ForecastTransformer {
 
-    fun transform(response: ForecastResponse?): Forecast? {
+    fun transform(response: ForecastApiModel?): Forecast? {
         response ?: return null
 
         return Forecast(
@@ -16,7 +16,7 @@ class ForecastTransformer {
         )
     }
 
-    private fun TimeTemperatureResponse.transform() =
+    private fun TimeTemperatureApiModel.transform() =
         time.mapIndexed { index, time ->
             ForecastUnit(
                 time = time.toLocalDateTime(),

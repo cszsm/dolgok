@@ -1,7 +1,7 @@
 package cszsm.dolgok.data
 
 import android.util.Log
-import cszsm.dolgok.data.dto.ForecastResponse
+import cszsm.dolgok.data.dto.ForecastApiModel
 import cszsm.dolgok.data.requests.ForecastRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -9,16 +9,16 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.resources.get
 import kotlinx.datetime.LocalDateTime
 
-class WeatherServiceImpl(
+class WeatherDataSourceImpl(
     private val client: HttpClient,
-) : WeatherService {
+) : WeatherDataSource {
 
     override suspend fun getForecast(
         latitude: Float,
         longitude: Float,
         startHour: LocalDateTime,
         endHour: LocalDateTime,
-    ): ForecastResponse? {
+    ): ForecastApiModel? {
         return try {
             client.get(
                 ForecastRequest(
@@ -35,6 +35,6 @@ class WeatherServiceImpl(
     }
 
     private companion object {
-        val TAG = WeatherServiceImpl::class.simpleName
+        val TAG = WeatherDataSourceImpl::class.simpleName
     }
 }
