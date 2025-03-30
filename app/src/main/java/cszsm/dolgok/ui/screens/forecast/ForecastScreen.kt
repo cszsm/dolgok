@@ -2,6 +2,8 @@ package cszsm.dolgok.ui.screens.forecast
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +41,6 @@ fun ForecastScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
     ) {
         ForecastContent(
             forecast = state.forecast,
@@ -45,38 +48,46 @@ fun ForecastScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ForecastContent(
     forecast: Forecast?,
 ) {
-    if (forecast == null) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = "Loading...",
-                style = Typography.headlineMedium,
-            )
-        }
-    } else {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(12.dp),
-        ) {
-            val currentDayOfWeek = forecast.hourly.firstOrNull()?.time?.dayOfWeek
-                ?: return@LazyColumn
+    Column {
+        TopAppBar(
+            title = {
+                Text(text = "Temperature")
+            }
+        )
+        if (forecast == null) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "Loading...",
+                    style = Typography.headlineMedium,
+                )
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(12.dp),
+            ) {
+                val currentDayOfWeek = forecast.hourly.firstOrNull()?.time?.dayOfWeek
+                    ?: return@LazyColumn
 
-            forecast.hourly.forEach {
-                val time = it.time?.time.toString()
-                val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
-                val temperature = it.temperature.toString()
-                item {
-                    TemperatureItem(
-                        time = time,
-                        day = day,
-                        temperature = temperature,
-                    )
+                forecast.hourly.forEach {
+                    val time = it.time?.time.toString()
+                    val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
+                    val temperature = it.temperature.toString()
+                    item {
+                        TemperatureItem(
+                            time = time,
+                            day = day,
+                            temperature = temperature,
+                        )
+                    }
                 }
             }
         }
@@ -101,13 +112,14 @@ private fun TemperatureItem(
         ) {
             Text(
                 text = time,
-                style = Typography.headlineSmall,
+                style = Typography.titleMedium,
                 modifier = Modifier
                     .padding(12.dp)
             )
             Text(
                 text = day,
-                style = Typography.headlineSmall,
+                style = Typography.titleMedium,
+                color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(12.dp)
@@ -118,7 +130,7 @@ private fun TemperatureItem(
             ) {
                 Text(
                     text = "$temperature ${kotlin.text.Typography.degree}C",
-                    style = Typography.headlineSmall,
+                    style = Typography.titleMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
