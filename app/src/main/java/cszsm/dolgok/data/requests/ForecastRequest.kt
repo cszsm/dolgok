@@ -1,6 +1,7 @@
 package cszsm.dolgok.data.requests
 
 import io.ktor.resources.Resource
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
 @Suppress("PropertyName", "unused")
@@ -9,7 +10,10 @@ class ForecastRequest(
     val latitude: Float,
     val longitude: Float,
     val timezone: String = "auto",
-    val hourly: String = "temperature_2m,rain,surface_pressure",
-    val start_hour: LocalDateTime,
-    val end_hour: LocalDateTime,
+    val hourly: String? = null,
+    val daily: String? = null,
+    val start_hour: LocalDateTime? = null,
+    val end_hour: LocalDateTime? = null,
+    val start_date: LocalDate? = null,
+    val end_date: LocalDate? = null,
 )
