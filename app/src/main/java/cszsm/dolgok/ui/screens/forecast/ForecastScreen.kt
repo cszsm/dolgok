@@ -14,12 +14,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -53,10 +59,12 @@ fun ForecastScreen(
 private fun ForecastContent(
     forecast: Forecast?,
 ) {
+    var selectedWeatherVariable by remember { mutableStateOf<WeatherVariable>(WeatherVariable.TEMPERATURE) }
+
     Column {
         TopAppBar(
             title = {
-                Text(text = "Temperature")
+                Text(text = "Forecast")
             }
         )
         if (forecast == null) {
@@ -70,36 +78,77 @@ private fun ForecastContent(
                 )
             }
         } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                contentPadding = PaddingValues(12.dp),
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = 12.dp)
             ) {
-                val currentDayOfWeek = forecast.hourly.firstOrNull()?.time?.dayOfWeek
-                    ?: return@LazyColumn
-
-                forecast.hourly.forEach {
-                    val time = it.time?.time.toString()
-                    val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
-                    val temperature = it.temperature.toString()
-                    item {
-                        TemperatureItem(
-                            time = time,
-                            day = day,
-                            temperature = temperature,
-                        )
-                    }
-                }
+                WeatherVariableSelector(
+                    selected = selectedWeatherVariable,
+                    onSelect = { selectedWeatherVariable = it }
+                )
+                ForecastList(
+                    forecast = forecast,
+                    selectedWeatherVariable = selectedWeatherVariable,
+                )
             }
         }
     }
 }
 
-@Preview
 @Composable
-private fun TemperatureItem(
-    time: String = "11:00",
-    day: String = "monday",
-    temperature: String = "10.1",
+private fun WeatherVariableSelector(
+    selected: WeatherVariable,
+    onSelect: (WeatherVariable) -> Unit,
+) {
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier.padding(vertical = 12.dp)
+    ) {
+        WeatherVariable.entries.forEachIndexed { index, weatherVariable ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = WeatherVariable.entries.size
+                ),
+                label = { Text(weatherVariable.label) },
+                selected = weatherVariable == selected,
+                onClick = { onSelect(weatherVariable) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForecastList(
+    forecast: Forecast,
+    selectedWeatherVariable: WeatherVariable,
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        contentPadding = PaddingValues(bottom = 12.dp),
+    ) {
+        val currentDayOfWeek = forecast.hourly.firstOrNull()?.time?.dayOfWeek
+            ?: return@LazyColumn
+
+        forecast.hourly.forEach {
+            val time = it.time?.time.toString()
+            val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
+            val forecastValue = it.getValue(weatherVariable = selectedWeatherVariable)
+            item {
+                ForecastItem(
+                    time = time,
+                    day = day,
+                    forecastValue = forecastValue ?: "",
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ForecastItem(
+    time: String,
+    day: String,
+    forecastValue: String,
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -129,7 +178,7 @@ private fun TemperatureItem(
                     .width(140.dp)
             ) {
                 Text(
-                    text = "$temperature ${kotlin.text.Typography.degree}C",
+                    text = forecastValue,
                     style = Typography.titleMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -141,18 +190,25 @@ private fun TemperatureItem(
     }
 }
 
-@Preview
-@Composable
-private fun ForecastContent_Preview() {
-    val forecast = Forecast(
-        hourly = listOf(
-            ForecastUnit(time = getPreviewTime(dayOfMonth = 22, hour = 22), temperature = 11.4f),
-            ForecastUnit(time = getPreviewTime(dayOfMonth = 22, hour = 23), temperature = 11.7f),
-            ForecastUnit(time = getPreviewTime(dayOfMonth = 23, hour = 0), temperature = 10.2f),
-            ForecastUnit(time = getPreviewTime(dayOfMonth = 23, hour = 1), temperature = 9.9f),
-        )
-    )
-    ForecastContent(forecast = forecast)
+private val WeatherVariable.label
+    get() = when (this) {
+        WeatherVariable.TEMPERATURE -> "Temperature"
+        WeatherVariable.RAIN -> "Rain"
+        WeatherVariable.PRESSURE -> "Pressure"
+    }
+
+private fun Float.asTemperature() = "$this ${kotlin.text.Typography.degree}C"
+
+private fun Float.asRain() = "$this mm"
+
+private fun Float.asPressure() = "$this hPa"
+
+private fun ForecastUnit.getValue(
+    weatherVariable: WeatherVariable,
+) = when (weatherVariable) {
+    WeatherVariable.TEMPERATURE -> temperature?.asTemperature()
+    WeatherVariable.RAIN -> rain?.asRain()
+    WeatherVariable.PRESSURE -> pressure?.asPressure()
 }
 
 private fun getPreviewTime(dayOfMonth: Int, hour: Int) =
@@ -168,4 +224,48 @@ private fun ForecastUnit.getDayLabel(
     } else {
         ""
     }
+}
+
+@Preview
+@Composable
+private fun ForecastItem_Preview() {
+    ForecastItem(
+        time = "11:00",
+        day = "monday",
+        forecastValue = 10.1f.asTemperature(),
+    )
+}
+
+@Preview
+@Composable
+private fun ForecastContent_Preview() {
+    val forecast = Forecast(
+        hourly = listOf(
+            ForecastUnit(
+                time = getPreviewTime(dayOfMonth = 22, hour = 22),
+                temperature = 11.4f,
+                rain = 0f,
+                pressure = 999.7f
+            ),
+            ForecastUnit(
+                time = getPreviewTime(dayOfMonth = 22, hour = 23),
+                temperature = 11.7f,
+                rain = 0f,
+                pressure = 998.6f
+            ),
+            ForecastUnit(
+                time = getPreviewTime(dayOfMonth = 23, hour = 0),
+                temperature = 10.2f,
+                rain = 0.3f,
+                pressure = 997f
+            ),
+            ForecastUnit(
+                time = getPreviewTime(dayOfMonth = 23, hour = 1),
+                temperature = 9.9f,
+                rain = 0.1f,
+                pressure = 996.4f
+            ),
+        )
+    )
+    ForecastContent(forecast = forecast)
 }
