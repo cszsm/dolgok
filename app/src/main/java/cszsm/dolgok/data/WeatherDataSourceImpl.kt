@@ -13,7 +13,7 @@ class WeatherDataSourceImpl(
     private val client: HttpClient,
 ) : WeatherDataSource {
 
-    override suspend fun getForecast(
+    override suspend fun getHourlyForecast(
         latitude: Float,
         longitude: Float,
         startHour: LocalDateTime,
@@ -26,6 +26,25 @@ class WeatherDataSourceImpl(
                     longitude = longitude,
                     start_hour = startHour,
                     end_hour = endHour,
+                    hourly = "temperature_2m,rain,surface_pressure",
+                )
+            ).body()
+        } catch (e: ResponseException) {
+            Log.e(TAG, e.response.status.description)
+            null
+        }
+    }
+
+    override suspend fun getDailyForecast(
+        latitude: Float,
+        longitude: Float,
+    ): ForecastApiModel? {
+        return try {
+            client.get(
+                ForecastRequest(
+                    latitude = latitude,
+                    longitude = longitude,
+                    daily = "temperature_2m_max,temperature_2m_min,rain_sum",
                 )
             ).body()
         } catch (e: ResponseException) {

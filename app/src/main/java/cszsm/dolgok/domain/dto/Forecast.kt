@@ -1,5 +1,9 @@
 package cszsm.dolgok.domain.dto
 
-data class Forecast(
-    val hourly: List<ForecastUnit>
+data class HourlyForecast(
+    val hours: List<HourlyForecastUnit>?,
+)
+
+data class DailyForecast(
+    val days: List<DailyForecastUnit>?,
 )
