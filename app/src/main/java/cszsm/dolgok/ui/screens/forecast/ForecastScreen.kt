@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
@@ -28,7 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.domain.dto.DailyForecast
@@ -38,6 +35,7 @@ import cszsm.dolgok.domain.dto.HourlyForecastUnit
 import cszsm.dolgok.ui.theme.Typography
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -148,11 +146,10 @@ private fun TimeResolutionSelector(
         resolutions.forEachIndexed { index, resolution ->
             ToggleButton(
                 modifier = Modifier.weight(1f),
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    resolutions.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
+                shapes = getToggleButtonShape(
+                    currentIndex = index,
+                    lastIndex = resolutions.lastIndex
+                ),
                 checked = selectedResolution == resolution,
                 onCheckedChange = { onSelect(resolution) },
             ) {
@@ -162,28 +159,39 @@ private fun TimeResolutionSelector(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WeatherVariableSelector(
     weatherVariables: List<WeatherVariable>,
     selectedWeatherVariable: WeatherVariable,
     onSelect: (WeatherVariable) -> Unit,
 ) {
-    SingleChoiceSegmentedButtonRow(
-        modifier = Modifier.padding(vertical = 12.dp)
-    ) {
-        weatherVariables.forEachIndexed { index, weatherVariable ->
-            SegmentedButton(
+    Row(horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        weatherVariables.forEachIndexed { index, variable ->
+            ToggleButton(
                 modifier = Modifier.weight(1f),
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = weatherVariables.size
+                shapes = getToggleButtonShape(
+                    currentIndex = index,
+                    lastIndex = weatherVariables.lastIndex
                 ),
-                label = { Text(weatherVariable.label) },
-                selected = weatherVariable == selectedWeatherVariable,
-                onClick = { onSelect(weatherVariable) }
-            )
+                checked = selectedWeatherVariable == variable,
+                onCheckedChange = { onSelect(variable) }
+            ) {
+                Text(text = variable.label)
+            }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun getToggleButtonShape(
+    currentIndex: Int,
+    lastIndex: Int,
+) = when (currentIndex) {
+    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+    lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
 }
 
 @Composable
@@ -192,20 +200,48 @@ private fun HourlyForecastList(
     selectedWeatherVariable: WeatherVariable,
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        contentPadding = PaddingValues(bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        contentPadding = PaddingValues(vertical = 12.dp),
     ) {
         val currentDayOfWeek = forecast.hours?.firstOrNull()?.time?.dayOfWeek
             ?: return@LazyColumn
 
-        forecast.hours.forEach {
-            val time = it.time?.time?.toString() ?: ""
-            val day = it.getDayLabel(currentDayOfWeek = currentDayOfWeek)
-            val forecastValue = it.getValue(weatherVariable = selectedWeatherVariable)
+        item {
+            Text(
+                text = "today",
+                style = Typography.titleMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+
+        forecast.hours.forEachIndexed { index, forecastUnit ->
+            forecastUnit.time ?: return@forEachIndexed
+
+            val time = forecastUnit.time.time.toString()
+            val day = forecastUnit.getDayLabel(currentDayOfWeek = currentDayOfWeek)
+            val forecastValue = forecastUnit.getValue(weatherVariable = selectedWeatherVariable)
+
+            if (forecastUnit.time.time == LocalTime(hour = 0, minute = 0)) {
+                item {
+                    Text(
+                        text = day,
+                        style = Typography.titleMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+
             item {
                 ForecastItem(
+                    shapes = getForecastItemShape(
+                        index = index,
+                        size = forecast.hours.size,
+                        forcedTop = forecastUnit.time.time == FIRST_HOUR_OF_THE_DAY,
+                        forcedBottom = forecastUnit.time.time == LAST_HOUR_OF_THE_DAY,
+                    ),
                     primaryLabel = time,
-                    secondaryLabel = day,
                     valueLabel = forecastValue ?: "",
                 )
             }
@@ -219,15 +255,16 @@ private fun DailyForecastList(
     selectedWeatherVariable: WeatherVariable,
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        contentPadding = PaddingValues(bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        contentPadding = PaddingValues(vertical = 12.dp),
     ) {
-        forecast.days?.forEach {
-            val day = it.time?.dayOfWeek?.toString()?.lowercase() ?: ""
-            val forecastValue = it.getLabel(weatherVariable = selectedWeatherVariable)
+        forecast.days?.forEachIndexed { index, forecastUnit ->
+            val day = forecastUnit.time?.dayOfWeek?.toString()?.lowercase() ?: ""
+            val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
 
             item {
                 ForecastItem(
+                    shapes = getForecastItemShape(index = index, size = forecast.days.size),
                     primaryLabel = day,
                     valueLabel = forecastValue ?: "",
                 )
@@ -238,44 +275,47 @@ private fun DailyForecastList(
 
 @Composable
 private fun ForecastItem(
+    shapes: ForecastItemShapes,
     primaryLabel: String,
-    secondaryLabel: String = "",
     valueLabel: String,
 ) {
-    OutlinedCard(
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .wrapContentHeight(),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
+        Surface(
+            shape = shapes.leadingShape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.weight(6f)
         ) {
-            Text(
-                text = primaryLabel,
-                style = Typography.titleMedium,
-                modifier = Modifier
-                    .padding(12.dp)
-            )
-            Text(
-                text = secondaryLabel,
-                style = Typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(12.dp)
-            )
-            Card(
-                modifier = Modifier
-                    .width(180.dp)
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = primaryLabel,
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .align(Alignment.CenterStart)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+        Surface(
+            shape = shapes.trailingShape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier.weight(4f),
+        ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = valueLabel,
-                    style = Typography.titleMedium,
-                    textAlign = TextAlign.Center,
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
+                        .wrapContentSize()
+                        .align(Alignment.Center)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
         }
@@ -346,12 +386,92 @@ private fun HourlyForecastUnit.getDayLabel(
     }
 }
 
+private sealed interface ForecastItemShapes {
+    val leadingShape: Shape
+    val trailingShape: Shape
+
+    data object Single : ForecastItemShapes {
+        override val leadingShape = RoundedCornerShape(
+            topStart = RADIUS_LARGE,
+            bottomStart = RADIUS_LARGE,
+            topEnd = RADIUS_SMALL,
+            bottomEnd = RADIUS_SMALL,
+        )
+        override val trailingShape = RoundedCornerShape(
+            topStart = RADIUS_SMALL,
+            bottomStart = RADIUS_SMALL,
+            topEnd = RADIUS_LARGE,
+            bottomEnd = RADIUS_LARGE,
+        )
+    }
+
+    data object Top : ForecastItemShapes {
+        override val leadingShape = RoundedCornerShape(
+            topStart = RADIUS_LARGE,
+            bottomStart = RADIUS_SMALL,
+            topEnd = RADIUS_SMALL,
+            bottomEnd = RADIUS_SMALL,
+        )
+        override val trailingShape = RoundedCornerShape(
+            topStart = RADIUS_SMALL,
+            bottomStart = RADIUS_SMALL,
+            topEnd = RADIUS_LARGE,
+            bottomEnd = RADIUS_SMALL,
+        )
+    }
+
+    data object Middle : ForecastItemShapes {
+        override val leadingShape = RoundedCornerShape(
+            size = RADIUS_SMALL,
+        )
+        override val trailingShape = RoundedCornerShape(
+            size = RADIUS_SMALL,
+        )
+    }
+
+    data object Bottom : ForecastItemShapes {
+        override val leadingShape = RoundedCornerShape(
+            topStart = RADIUS_SMALL,
+            bottomStart = RADIUS_LARGE,
+            topEnd = RADIUS_SMALL,
+            bottomEnd = RADIUS_SMALL,
+        )
+        override val trailingShape = RoundedCornerShape(
+            topStart = RADIUS_SMALL,
+            bottomStart = RADIUS_SMALL,
+            topEnd = RADIUS_SMALL,
+            bottomEnd = RADIUS_LARGE,
+        )
+    }
+
+    private companion object {
+        val RADIUS_SMALL = 4.dp
+        val RADIUS_LARGE = 16.dp
+    }
+}
+
+private fun getForecastItemShape(
+    index: Int,
+    size: Int,
+    forcedTop: Boolean = false,
+    forcedBottom: Boolean = false,
+) = when {
+    size == 1 -> ForecastItemShapes.Single
+    forcedTop || index == 0 -> ForecastItemShapes.Top
+    forcedBottom || index == size - 1 -> ForecastItemShapes.Bottom
+    else -> ForecastItemShapes.Middle
+}
+
+
+private val FIRST_HOUR_OF_THE_DAY = LocalTime(hour = 0, minute = 0)
+private val LAST_HOUR_OF_THE_DAY = LocalTime(hour = 23, minute = 0)
+
 @Preview
 @Composable
 private fun ForecastItem_Preview() {
     ForecastItem(
+        shapes = ForecastItemShapes.Single,
         primaryLabel = "11:00",
-        secondaryLabel = "monday",
         valueLabel = 10.1f.asTemperature(),
     )
 }
