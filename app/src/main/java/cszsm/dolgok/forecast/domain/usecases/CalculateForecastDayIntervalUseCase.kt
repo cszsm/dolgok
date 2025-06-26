@@ -8,7 +8,7 @@ import cszsm.dolgok.core.util.roundDownToHour
 import cszsm.dolgok.core.util.toLocalDateTime
 import kotlinx.datetime.Clock
 
-class CalculateForecastDayIntervalUseCase() {
+class CalculateForecastDayIntervalUseCase {
 
     operator fun invoke(
         forecastDay: ForecastDay,

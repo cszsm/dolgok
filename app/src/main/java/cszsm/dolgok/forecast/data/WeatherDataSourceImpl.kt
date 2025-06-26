@@ -1,6 +1,7 @@
 package cszsm.dolgok.forecast.data
 
 import android.util.Log
+import cszsm.dolgok.forecast.data.models.ForecastApiModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException

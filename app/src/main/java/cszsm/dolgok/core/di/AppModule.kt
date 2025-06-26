@@ -1,9 +1,9 @@
-package cszsm.dolgok
+package cszsm.dolgok.core.di
 
 import cszsm.dolgok.forecast.data.ForecastRepository
+import cszsm.dolgok.forecast.data.ForecastTransformer
 import cszsm.dolgok.forecast.data.WeatherDataSource
 import cszsm.dolgok.forecast.data.WeatherDataSourceImpl
-import cszsm.dolgok.forecast.domain.transformers.ForecastTransformer
 import cszsm.dolgok.forecast.domain.usecases.CalculateForecastDayIntervalUseCase
 import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase

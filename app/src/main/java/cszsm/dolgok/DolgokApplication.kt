@@ -1,6 +1,7 @@
 package cszsm.dolgok
 
 import android.app.Application
+import cszsm.dolgok.core.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
