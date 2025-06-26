@@ -1,20 +1,11 @@
 package cszsm.dolgok.forecast.presentation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,16 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItem
-import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItemShapeParams
-import cszsm.dolgok.core.presentation.theme.Typography
+import cszsm.dolgok.core.presentation.components.loading.Loading
 import cszsm.dolgok.forecast.domain.models.DailyForecast
-import cszsm.dolgok.forecast.domain.models.DailyForecastUnit
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
-import kotlinx.datetime.DayOfWeek
+import cszsm.dolgok.forecast.presentation.components.DailyForecastList
+import cszsm.dolgok.forecast.presentation.components.HourlyForecastList
+import cszsm.dolgok.forecast.presentation.components.TimeResolutionButtonGroup
+import cszsm.dolgok.forecast.presentation.components.WeatherVariableButtonGroup
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -76,7 +66,7 @@ private fun ForecastContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 12.dp)
         ) {
-            TimeResolutionSelector(
+            TimeResolutionButtonGroup(
                 selectedResolution = selectedTimeResolution,
                 onSelect = onTimeResolutionSelect
             )
@@ -86,7 +76,7 @@ private fun ForecastContent(
                     if (hourlyForecast == null) {
                         Loading()
                     } else {
-                        WeatherVariableSelector(
+                        WeatherVariableButtonGroup(
                             weatherVariables = TimeResolution.HOURLY.weatherVariables,
                             selectedWeatherVariable = selectedWeatherVariable,
                             onSelect = onWeatherVariableChange,
@@ -101,7 +91,7 @@ private fun ForecastContent(
                     if (dailyForecast == null) {
                         Loading()
                     } else {
-                        WeatherVariableSelector(
+                        WeatherVariableButtonGroup(
                             weatherVariables = TimeResolution.DAILY.weatherVariables,
                             selectedWeatherVariable = selectedWeatherVariable,
                             onSelect = onWeatherVariableChange,
@@ -115,168 +105,6 @@ private fun ForecastContent(
         }
     }
 }
-
-@Composable
-private fun Loading() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(
-            text = "Loading...",
-            style = Typography.headlineMedium,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun TimeResolutionSelector(
-    selectedResolution: TimeResolution,
-    onSelect: (TimeResolution) -> Unit,
-) {
-    val resolutions = TimeResolution.entries
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-    ) {
-        resolutions.forEachIndexed { index, resolution ->
-            ToggleButton(
-                modifier = Modifier.weight(1f),
-                shapes = getToggleButtonShape(
-                    currentIndex = index,
-                    lastIndex = resolutions.lastIndex
-                ),
-                checked = selectedResolution == resolution,
-                onCheckedChange = { onSelect(resolution) },
-            ) {
-                Text(text = resolution.label)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun WeatherVariableSelector(
-    weatherVariables: List<WeatherVariable>,
-    selectedWeatherVariable: WeatherVariable,
-    onSelect: (WeatherVariable) -> Unit,
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        weatherVariables.forEachIndexed { index, variable ->
-            ToggleButton(
-                modifier = Modifier.weight(1f),
-                shapes = getToggleButtonShape(
-                    currentIndex = index,
-                    lastIndex = weatherVariables.lastIndex
-                ),
-                checked = selectedWeatherVariable == variable,
-                onCheckedChange = { onSelect(variable) }
-            ) {
-                Text(text = variable.label)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun getToggleButtonShape(
-    currentIndex: Int,
-    lastIndex: Int,
-) = when (currentIndex) {
-    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-    lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-}
-
-@Composable
-private fun HourlyForecastList(
-    forecast: HourlyForecast,
-    selectedWeatherVariable: WeatherVariable,
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(vertical = 12.dp),
-    ) {
-        val currentDayOfWeek = forecast.hours?.firstOrNull()?.time?.dayOfWeek
-            ?: return@LazyColumn
-
-        item {
-            Text(
-                text = "today",
-                style = Typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-
-        forecast.hours.forEachIndexed { index, forecastUnit ->
-            forecastUnit.time ?: return@forEachIndexed
-
-            val time = forecastUnit.time.time.toString()
-            val day = forecastUnit.getDayLabel(currentDayOfWeek = currentDayOfWeek)
-            val forecastValue = forecastUnit.getValue(weatherVariable = selectedWeatherVariable)
-
-            if (forecastUnit.time.time == LocalTime(hour = 0, minute = 0)) {
-                item {
-                    Text(
-                        text = day,
-                        style = Typography.titleMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                }
-            }
-
-            item {
-                SingleValueListItem(
-                    title = time,
-                    value = forecastValue ?: "",
-                    shapeParams = SingleValueListItemShapeParams(
-                        index = index, size = forecast.hours.size,
-                        forcedTop = forecastUnit.time.time == FIRST_HOUR_OF_THE_DAY,
-                        forcedBottom = forecastUnit.time.time == LAST_HOUR_OF_THE_DAY,
-                    )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DailyForecastList(
-    forecast: DailyForecast,
-    selectedWeatherVariable: WeatherVariable,
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(vertical = 12.dp),
-    ) {
-        forecast.days?.forEachIndexed { index, forecastUnit ->
-            val day = forecastUnit.time?.dayOfWeek?.toString()?.lowercase() ?: ""
-            val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
-
-            item {
-                SingleValueListItem(
-                    title = day,
-                    value = forecastValue ?: "",
-                    shapeParams = SingleValueListItemShapeParams(
-                        index = index,
-                        size = forecast.days.size
-                    )
-                )
-            }
-        }
-    }
-}
-
-private val TimeResolution.label
-    get() = when (this) {
-        TimeResolution.HOURLY -> "Hourly"
-        TimeResolution.DAILY -> "Daily"
-    }
 
 private val TimeResolution.weatherVariables
     get() = when (this) {
@@ -292,52 +120,8 @@ private val TimeResolution.weatherVariables
         )
     }
 
-private val WeatherVariable.label
-    get() = when (this) {
-        WeatherVariable.TEMPERATURE -> "Temperature"
-        WeatherVariable.RAIN -> "Rain"
-        WeatherVariable.PRESSURE -> "Pressure"
-    }
-
-private fun Float.asTemperature() = "$this ${kotlin.text.Typography.degree}C"
-
-private fun Float.asRain() = "$this mm"
-
-private fun Float.asPressure() = "$this hPa"
-
-private fun HourlyForecastUnit.getValue(
-    weatherVariable: WeatherVariable,
-) = when (weatherVariable) {
-    WeatherVariable.TEMPERATURE -> temperature?.asTemperature()
-    WeatherVariable.RAIN -> rain?.asRain()
-    WeatherVariable.PRESSURE -> pressure?.asPressure()
-}
-
-private fun DailyForecastUnit.getLabel(
-    weatherVariable: WeatherVariable,
-) = when (weatherVariable) {
-    WeatherVariable.TEMPERATURE -> "${temperatureMin?.asTemperature()} - ${temperatureMax?.asTemperature()}"
-    WeatherVariable.RAIN -> rainSum?.asRain()
-    WeatherVariable.PRESSURE -> "" // no pressure data for daily forecast
-}
-
 private fun getPreviewTime(dayOfMonth: Int, hour: Int) =
     LocalDateTime(year = 2025, monthNumber = 3, dayOfMonth = dayOfMonth, hour = hour, minute = 0)
-
-private fun HourlyForecastUnit.getDayLabel(
-    currentDayOfWeek: DayOfWeek,
-): String {
-    val forecastDayOfWeek = time?.dayOfWeek
-
-    return if (forecastDayOfWeek != currentDayOfWeek) {
-        forecastDayOfWeek.toString().lowercase()
-    } else {
-        ""
-    }
-}
-
-private val FIRST_HOUR_OF_THE_DAY = LocalTime(hour = 0, minute = 0)
-private val LAST_HOUR_OF_THE_DAY = LocalTime(hour = 23, minute = 0)
 
 @Preview
 @Composable
