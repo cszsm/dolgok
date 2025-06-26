@@ -1,13 +1,13 @@
 package cszsm.dolgok
 
-import cszsm.dolgok.data.ForecastRepository
-import cszsm.dolgok.data.WeatherDataSource
-import cszsm.dolgok.data.WeatherDataSourceImpl
-import cszsm.dolgok.domain.transformers.ForecastTransformer
-import cszsm.dolgok.domain.usecases.CalculateForecastDayIntervalUseCase
-import cszsm.dolgok.domain.usecases.GetDailyForecastUseCase
-import cszsm.dolgok.domain.usecases.GetHourlyForecastUseCase
-import cszsm.dolgok.ui.screens.forecast.ForecastViewModel
+import cszsm.dolgok.forecast.data.ForecastRepository
+import cszsm.dolgok.forecast.data.WeatherDataSource
+import cszsm.dolgok.forecast.data.WeatherDataSourceImpl
+import cszsm.dolgok.forecast.domain.transformers.ForecastTransformer
+import cszsm.dolgok.forecast.domain.usecases.CalculateForecastDayIntervalUseCase
+import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
+import cszsm.dolgok.forecast.presentation.ForecastViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig

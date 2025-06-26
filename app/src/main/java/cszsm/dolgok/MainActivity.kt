@@ -6,10 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import cszsm.dolgok.ui.screens.forecast.ForecastScreen
-import cszsm.dolgok.ui.screens.lazycolumn.LazyColumnScreen
-import cszsm.dolgok.ui.screens.main.MainScreen
-import cszsm.dolgok.ui.theme.DolgokTheme
+import cszsm.dolgok.forecast.presentation.ForecastScreen
+import cszsm.dolgok.lazycolumn.presentation.LazyColumnScreen
+import cszsm.dolgok.home.presentation.MainScreen
+import cszsm.dolgok.core.presentation.theme.DolgokTheme
 import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
