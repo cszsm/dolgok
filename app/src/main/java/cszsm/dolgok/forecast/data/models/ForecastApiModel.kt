@@ -1,4 +1,4 @@
-package cszsm.dolgok.forecast.data
+package cszsm.dolgok.forecast.data.models
 
 import kotlinx.serialization.Serializable
 

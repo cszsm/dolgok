@@ -1,11 +1,11 @@
-package cszsm.dolgok.forecast.domain.transformers
+package cszsm.dolgok.forecast.data
 
-import cszsm.dolgok.forecast.data.ForecastApiModel
-import cszsm.dolgok.forecast.data.ForecastDataApiModel
+import cszsm.dolgok.forecast.data.models.ForecastApiModel
+import cszsm.dolgok.forecast.data.models.ForecastDataApiModel
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.DailyForecastUnit
-import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
+import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 

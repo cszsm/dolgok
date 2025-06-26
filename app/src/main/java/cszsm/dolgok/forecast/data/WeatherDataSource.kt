@@ -1,5 +1,6 @@
 package cszsm.dolgok.forecast.data
 
+import cszsm.dolgok.forecast.data.models.ForecastApiModel
 import kotlinx.datetime.LocalDateTime
 
 interface WeatherDataSource {

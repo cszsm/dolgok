@@ -1,13 +1,11 @@
 package cszsm.dolgok.forecast.domain.usecases
 
 import cszsm.dolgok.forecast.data.ForecastRepository
-import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.ForecastDay
-import cszsm.dolgok.forecast.domain.transformers.ForecastTransformer
+import cszsm.dolgok.forecast.domain.models.HourlyForecast
 
 class GetHourlyForecastUseCase(
     private val forecastRepository: ForecastRepository,
-    private val forecastTransformer: ForecastTransformer,
     private val calculateForecastDayIntervalUseCase: CalculateForecastDayIntervalUseCase,
 ) {
     suspend operator fun invoke(
@@ -24,6 +22,5 @@ class GetHourlyForecastUseCase(
                 startHour = interval.start,
                 endHour = interval.end,
             )
-            .let(forecastTransformer::transformHourly)
     }
 }
