@@ -50,6 +50,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform {}
+    }
 }
 
 dependencies {
@@ -74,6 +78,7 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

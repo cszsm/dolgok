@@ -1,5 +1,7 @@
 package cszsm.dolgok.forecast.data
 
+import cszsm.dolgok.core.domain.error.DataError
+import cszsm.dolgok.core.domain.result.Result
 import cszsm.dolgok.forecast.data.models.ForecastApiModel
 import cszsm.dolgok.forecast.data.models.ForecastDataApiModel
 import cszsm.dolgok.forecast.domain.models.DailyForecast
@@ -11,50 +13,74 @@ import kotlinx.datetime.LocalDateTime
 
 class ForecastTransformer {
 
-    fun transformHourly(response: ForecastApiModel?): HourlyForecast? {
-        response ?: return null
+    fun transformHourly(response: ForecastApiModel?): Result<HourlyForecast, DataError> {
+        response?.hourly ?: return Result.Failure(error = DataError.INCOMPLETE_DATA)
 
-        return HourlyForecast(
-            hours = response.hourly?.transformHourly(),
-        )
+        return response.hourly.transformHourly()
     }
 
-    fun transformDaily(response: ForecastApiModel?): DailyForecast? {
-        response ?: return null
+    fun transformDaily(response: ForecastApiModel?): Result<DailyForecast, DataError> {
+        response?.daily ?: return Result.Failure(error = DataError.INCOMPLETE_DATA)
 
-        return DailyForecast(
-            days = response.daily?.transformDaily()
-        )
+        return response.daily.transformDaily()
     }
 
-    private fun ForecastDataApiModel.transformHourly() =
-        time.mapIndexed { index, time ->
+    private fun ForecastDataApiModel.transformHourly(): Result<HourlyForecast, DataError> {
+
+        val hours = time.mapIndexed { index, time ->
+
+            val parsedTime = time.toLocalDateTimeOrNull()
+                ?: return Result.Failure(DataError.WRONG_DATA_FORMAT)
+            val parsedTemperature = temperature_2m?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+            val parsedRain = rain?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+            val parsedPressure = surface_pressure?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+
             HourlyForecastUnit(
-                time = time.toLocalDateTime(),
-                temperature = temperature_2m?.getOrNull(index),
-                rain = rain?.getOrNull(index),
-                pressure = surface_pressure?.getOrNull(index),
+                time = parsedTime,
+                temperature = parsedTemperature,
+                rain = parsedRain,
+                pressure = parsedPressure,
             )
         }
 
-    private fun ForecastDataApiModel.transformDaily() =
-        time.mapIndexed { index, time ->
+        return Result.Success(HourlyForecast(hours = hours))
+    }
+
+    private fun ForecastDataApiModel.transformDaily(): Result<DailyForecast, DataError> {
+
+        val days = time.mapIndexed { index, time ->
+
+            val parsedDate = time.toLocalDateOrNull()
+                ?: return Result.Failure(DataError.WRONG_DATA_FORMAT)
+            val parsedTemperatureMax = temperature_2m_max?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+            val parsedTemperatureMin = temperature_2m_min?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+            val parsedRainSum = rain_sum?.getOrNull(index)
+                ?: return Result.Failure(DataError.INCOMPLETE_DATA)
+
             DailyForecastUnit(
-                time = time.toLocalDate(),
-                temperatureMax = temperature_2m_max?.getOrNull(index),
-                temperatureMin = temperature_2m_min?.getOrNull(index),
-                rainSum = rain_sum?.getOrNull(index),
+                date = parsedDate,
+                temperatureMax = parsedTemperatureMax,
+                temperatureMin = parsedTemperatureMin,
+                rainSum = parsedRainSum,
             )
         }
 
-    private fun String.toLocalDateTime() =
+        return Result.Success(DailyForecast(days = days))
+    }
+
+    private fun String.toLocalDateTimeOrNull() =
         try {
             LocalDateTime.parse(this)
         } catch (e: IllegalArgumentException) {
             null
         }
 
-    private fun String.toLocalDate() =
+    private fun String.toLocalDateOrNull() =
         try {
             LocalDate.parse(this)
         } catch (e: IllegalArgumentException) {
