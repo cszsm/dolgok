@@ -26,6 +26,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
+@Suppress("SpellCheckingInspection")
 private const val WEATHER_BASE_URL = "api.open-meteo.com/v1/"
 
 val appModule = module {

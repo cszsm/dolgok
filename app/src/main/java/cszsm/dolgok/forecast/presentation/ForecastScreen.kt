@@ -14,7 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cszsm.dolgok.core.presentation.components.loading.Loading
+import cszsm.dolgok.core.domain.error.DataError
+import cszsm.dolgok.core.domain.result.Result
+import cszsm.dolgok.core.presentation.components.error.FullScreenError
+import cszsm.dolgok.core.presentation.components.loading.FullScreenLoading
+import cszsm.dolgok.core.presentation.error.message
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
@@ -49,8 +53,8 @@ fun ForecastScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ForecastContent(
-    hourlyForecast: HourlyForecast?,
-    dailyForecast: DailyForecast?,
+    hourlyForecast: Result<HourlyForecast, DataError>?,
+    dailyForecast: Result<DailyForecast, DataError>?,
     selectedTimeResolution: TimeResolution,
     selectedWeatherVariable: WeatherVariable,
     onTimeResolutionSelect: (TimeResolution) -> Unit,
@@ -73,37 +77,68 @@ private fun ForecastContent(
 
             when (selectedTimeResolution) {
                 TimeResolution.HOURLY ->
-                    if (hourlyForecast == null) {
-                        Loading()
-                    } else {
-                        WeatherVariableButtonGroup(
-                            weatherVariables = TimeResolution.HOURLY.weatherVariables,
+                    when (hourlyForecast) {
+                        null -> FullScreenLoading()
+
+                        is Result.Success -> HourlyForecastContent(
+                            hourlyForecast = hourlyForecast.data,
                             selectedWeatherVariable = selectedWeatherVariable,
-                            onSelect = onWeatherVariableChange,
+                            onWeatherVariableChange = onWeatherVariableChange,
                         )
-                        HourlyForecastList(
-                            forecast = hourlyForecast,
-                            selectedWeatherVariable = selectedWeatherVariable,
-                        )
+
+                        is Result.Failure -> FullScreenError(message = hourlyForecast.error.message)
                     }
 
                 TimeResolution.DAILY ->
-                    if (dailyForecast == null) {
-                        Loading()
-                    } else {
-                        WeatherVariableButtonGroup(
-                            weatherVariables = TimeResolution.DAILY.weatherVariables,
+                    when (dailyForecast) {
+                        null -> FullScreenLoading()
+
+                        is Result.Success -> DailyForecastContent(
+                            dailyForecast = dailyForecast.data,
                             selectedWeatherVariable = selectedWeatherVariable,
-                            onSelect = onWeatherVariableChange,
+                            onWeatherVariableChange = onWeatherVariableChange,
                         )
-                        DailyForecastList(
-                            forecast = dailyForecast,
-                            selectedWeatherVariable = selectedWeatherVariable,
-                        )
+
+
+                        is Result.Failure -> FullScreenError(message = dailyForecast.error.message)
                     }
             }
         }
     }
+}
+
+@Composable
+private fun HourlyForecastContent(
+    hourlyForecast: HourlyForecast,
+    selectedWeatherVariable: WeatherVariable,
+    onWeatherVariableChange: (WeatherVariable) -> Unit,
+) {
+    WeatherVariableButtonGroup(
+        weatherVariables = TimeResolution.HOURLY.weatherVariables,
+        selectedWeatherVariable = selectedWeatherVariable,
+        onSelect = onWeatherVariableChange,
+    )
+    HourlyForecastList(
+        forecast = hourlyForecast,
+        selectedWeatherVariable = selectedWeatherVariable,
+    )
+}
+
+@Composable
+private fun DailyForecastContent(
+    dailyForecast: DailyForecast,
+    selectedWeatherVariable: WeatherVariable,
+    onWeatherVariableChange: (WeatherVariable) -> Unit,
+) {
+    WeatherVariableButtonGroup(
+        weatherVariables = TimeResolution.DAILY.weatherVariables,
+        selectedWeatherVariable = selectedWeatherVariable,
+        onSelect = onWeatherVariableChange,
+    )
+    DailyForecastList(
+        forecast = dailyForecast,
+        selectedWeatherVariable = selectedWeatherVariable,
+    )
 }
 
 private val TimeResolution.weatherVariables
@@ -155,7 +190,7 @@ private fun ForecastContent_Preview() {
         )
     )
     ForecastContent(
-        hourlyForecast = hourlyForecast,
+        hourlyForecast = Result.Success(data = hourlyForecast),
         dailyForecast = null,
         selectedTimeResolution = TimeResolution.HOURLY,
         selectedWeatherVariable = WeatherVariable.TEMPERATURE,

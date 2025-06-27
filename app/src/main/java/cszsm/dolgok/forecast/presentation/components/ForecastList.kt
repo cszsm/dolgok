@@ -13,7 +13,6 @@ import cszsm.dolgok.forecast.domain.models.DailyForecastUnit
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
 import cszsm.dolgok.forecast.presentation.WeatherVariable
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 
 private val FIRST_HOUR_OF_THE_DAY = LocalTime(hour = 0, minute = 0)
@@ -28,21 +27,16 @@ fun HourlyForecastList(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
     ) {
-        val currentDayOfWeek = forecast.hours?.firstOrNull()?.time?.dayOfWeek
-            ?: return@LazyColumn
-
         item {
             SectionHeader(text = "today")
         }
 
         forecast.hours.forEachIndexed { index, forecastUnit ->
-            forecastUnit.time ?: return@forEachIndexed
-
             val time = forecastUnit.time.time.toString()
-            val day = forecastUnit.getDayLabel(currentDayOfWeek = currentDayOfWeek)
             val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
 
             if (forecastUnit.time.time == LocalTime(hour = 0, minute = 0)) {
+                val day = forecastUnit.time.dayOfWeek.toString().lowercase()
                 item {
                     SectionHeader(text = day)
                 }
@@ -51,7 +45,7 @@ fun HourlyForecastList(
             item {
                 SingleValueListItem(
                     title = time,
-                    value = forecastValue ?: "",
+                    value = forecastValue,
                     shapeParams = SingleValueListItemShapeParams(
                         index = index, size = forecast.hours.size,
                         forcedTop = forecastUnit.time.time == FIRST_HOUR_OF_THE_DAY,
@@ -72,14 +66,14 @@ fun DailyForecastList(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
     ) {
-        forecast.days?.forEachIndexed { index, forecastUnit ->
-            val day = forecastUnit.time?.dayOfWeek?.toString()?.lowercase() ?: ""
+        forecast.days.forEachIndexed { index, forecastUnit ->
+            val day = forecastUnit.date.dayOfWeek.toString().lowercase()
             val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
 
             item {
                 SingleValueListItem(
                     title = day,
-                    value = forecastValue ?: "",
+                    value = forecastValue,
                     shapeParams = SingleValueListItemShapeParams(
                         index = index,
                         size = forecast.days.size
@@ -90,31 +84,19 @@ fun DailyForecastList(
     }
 }
 
-private fun HourlyForecastUnit.getDayLabel(
-    currentDayOfWeek: DayOfWeek,
-): String {
-    val forecastDayOfWeek = time?.dayOfWeek
-
-    return if (forecastDayOfWeek != currentDayOfWeek) {
-        forecastDayOfWeek.toString().lowercase()
-    } else {
-        ""
-    }
-}
-
 private fun HourlyForecastUnit.getLabel(
     weatherVariable: WeatherVariable,
 ) = when (weatherVariable) {
-    WeatherVariable.TEMPERATURE -> temperature?.asTemperature()
-    WeatherVariable.RAIN -> rain?.asRain()
-    WeatherVariable.PRESSURE -> pressure?.asPressure()
+    WeatherVariable.TEMPERATURE -> temperature.asTemperature()
+    WeatherVariable.RAIN -> rain.asRain()
+    WeatherVariable.PRESSURE -> pressure.asPressure()
 }
 
 private fun DailyForecastUnit.getLabel(
     weatherVariable: WeatherVariable,
 ) = when (weatherVariable) {
-    WeatherVariable.TEMPERATURE -> "${temperatureMin?.asTemperature()} - ${temperatureMax?.asTemperature()}"
-    WeatherVariable.RAIN -> rainSum?.asRain()
+    WeatherVariable.TEMPERATURE -> "${temperatureMin.asTemperature()} - ${temperatureMax.asTemperature()}"
+    WeatherVariable.RAIN -> rainSum.asRain()
     WeatherVariable.PRESSURE -> "" // no pressure data for daily forecast
 }
 

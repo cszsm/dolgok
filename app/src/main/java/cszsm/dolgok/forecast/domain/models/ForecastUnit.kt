@@ -4,15 +4,15 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
 data class HourlyForecastUnit(
-    val time: LocalDateTime?,
-    val temperature: Float?,
-    val rain: Float?,
-    val pressure: Float?,
+    val time: LocalDateTime,
+    val temperature: Float,
+    val rain: Float,
+    val pressure: Float,
 )
 
 data class DailyForecastUnit(
-    val time: LocalDate?,
-    val temperatureMax: Float?,
-    val temperatureMin: Float?,
-    val rainSum: Float?,
+    val date: LocalDate,
+    val temperatureMax: Float,
+    val temperatureMin: Float,
+    val rainSum: Float,
 )

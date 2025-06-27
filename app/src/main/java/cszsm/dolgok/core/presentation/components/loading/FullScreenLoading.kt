@@ -11,7 +11,7 @@ import cszsm.dolgok.core.presentation.theme.Typography
 
 @Preview
 @Composable
-fun Loading() {
+fun FullScreenLoading() {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
