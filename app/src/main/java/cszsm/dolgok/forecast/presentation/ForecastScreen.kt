@@ -1,16 +1,20 @@
 package cszsm.dolgok.forecast.presentation
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,7 +28,7 @@ import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
 import cszsm.dolgok.forecast.presentation.components.DailyForecastList
 import cszsm.dolgok.forecast.presentation.components.HourlyForecastList
-import cszsm.dolgok.forecast.presentation.components.TimeResolutionButtonGroup
+import cszsm.dolgok.forecast.presentation.components.TimeResolutionTabRow
 import cszsm.dolgok.forecast.presentation.components.WeatherVariableButtonGroup
 import kotlinx.datetime.LocalDateTime
 import org.koin.androidx.compose.koinViewModel
@@ -36,18 +40,14 @@ fun ForecastScreen(
     val state by viewModel.state.collectAsState()
     viewModel.init()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        ForecastContent(
-            hourlyForecast = state.hourlyForecast,
-            dailyForecast = state.dailyForecast,
-            selectedTimeResolution = state.selectedTimeResolution,
-            selectedWeatherVariable = state.selectedWeatherVariable,
-            onTimeResolutionSelect = viewModel::onTimeResolutionChange,
-            onWeatherVariableChange = viewModel::onWeatherVariableChange,
-        )
-    }
+    ForecastContent(
+        hourlyForecast = state.hourlyForecast,
+        dailyForecast = state.dailyForecast,
+        selectedTimeResolution = state.selectedTimeResolution,
+        selectedWeatherVariable = state.selectedWeatherVariable,
+        onTimeResolutionSelect = viewModel::onTimeResolutionChange,
+        onWeatherVariableChange = viewModel::onWeatherVariableChange,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,48 +60,87 @@ private fun ForecastContent(
     onTimeResolutionSelect: (TimeResolution) -> Unit,
     onWeatherVariableChange: (WeatherVariable) -> Unit,
 ) {
-    Column {
-        TopAppBar(
-            title = {
-                Text(text = "Forecast")
-            }
-        )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        ) {
-            TimeResolutionButtonGroup(
-                selectedResolution = selectedTimeResolution,
+    val timeResolutions = TimeResolution.entries
+
+    val pagerState = rememberPagerState { timeResolutions.size }
+
+    LaunchedEffect(selectedTimeResolution) {
+        pagerState.animateScrollToPage(selectedTimeResolution.ordinal)
+    }
+    LaunchedEffect(pagerState.currentPage) {
+        onTimeResolutionSelect(TimeResolution.entries[pagerState.currentPage])
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Forecast")
+                }
+            )
+        }
+    ) { contentPadding ->
+        Column(modifier = Modifier.padding(contentPadding)) {
+
+            TimeResolutionTabRow(
+                timeResolutions = timeResolutions,
+                selectedTimeResolution = selectedTimeResolution,
                 onSelect = onTimeResolutionSelect
             )
 
-            when (selectedTimeResolution) {
-                TimeResolution.HOURLY ->
-                    when (hourlyForecast) {
-                        null -> FullScreenLoading()
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) { index ->
+                ForecastPage(
+                    selectedTimeResolution = timeResolutions[index],
+                    hourlyForecast = hourlyForecast,
+                    dailyForecast = dailyForecast,
+                    selectedWeatherVariable = selectedWeatherVariable,
+                    onWeatherVariableChange = onWeatherVariableChange,
+                )
+            }
+        }
+    }
+}
 
-                        is Result.Success -> HourlyForecastContent(
-                            hourlyForecast = hourlyForecast.data,
-                            selectedWeatherVariable = selectedWeatherVariable,
-                            onWeatherVariableChange = onWeatherVariableChange,
-                        )
+@Composable
+fun ForecastPage(
+    selectedTimeResolution: TimeResolution,
+    hourlyForecast: Result<HourlyForecast, DataError>?,
+    dailyForecast: Result<DailyForecast, DataError>?,
+    selectedWeatherVariable: WeatherVariable,
+    onWeatherVariableChange: (WeatherVariable) -> Unit,
+) {
+    when (selectedTimeResolution) {
+        TimeResolution.HOURLY -> {
+            when (hourlyForecast) {
+                null -> FullScreenLoading()
 
-                        is Result.Failure -> FullScreenError(message = hourlyForecast.error.message)
-                    }
+                is Result.Success -> HourlyForecastContent(
+                    hourlyForecast = hourlyForecast.data,
+                    selectedWeatherVariable = selectedWeatherVariable,
+                    onWeatherVariableChange = onWeatherVariableChange,
+                )
 
-                TimeResolution.DAILY ->
-                    when (dailyForecast) {
-                        null -> FullScreenLoading()
+                is Result.Failure -> FullScreenError(message = hourlyForecast.error.message)
+            }
+        }
 
-                        is Result.Success -> DailyForecastContent(
-                            dailyForecast = dailyForecast.data,
-                            selectedWeatherVariable = selectedWeatherVariable,
-                            onWeatherVariableChange = onWeatherVariableChange,
-                        )
+        TimeResolution.DAILY -> {
+            when (dailyForecast) {
+                null -> FullScreenLoading()
 
+                is Result.Success -> DailyForecastContent(
+                    dailyForecast = dailyForecast.data,
+                    selectedWeatherVariable = selectedWeatherVariable,
+                    onWeatherVariableChange = onWeatherVariableChange,
+                )
 
-                        is Result.Failure -> FullScreenError(message = dailyForecast.error.message)
-                    }
+                is Result.Failure -> FullScreenError(message = dailyForecast.error.message)
             }
         }
     }
@@ -113,15 +152,21 @@ private fun HourlyForecastContent(
     selectedWeatherVariable: WeatherVariable,
     onWeatherVariableChange: (WeatherVariable) -> Unit,
 ) {
-    WeatherVariableButtonGroup(
-        weatherVariables = TimeResolution.HOURLY.weatherVariables,
-        selectedWeatherVariable = selectedWeatherVariable,
-        onSelect = onWeatherVariableChange,
-    )
-    HourlyForecastList(
-        forecast = hourlyForecast,
-        selectedWeatherVariable = selectedWeatherVariable,
-    )
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .fillMaxHeight()
+    ) {
+        WeatherVariableButtonGroup(
+            weatherVariables = TimeResolution.HOURLY.weatherVariables,
+            selectedWeatherVariable = selectedWeatherVariable,
+            onSelect = onWeatherVariableChange,
+        )
+        HourlyForecastList(
+            forecast = hourlyForecast,
+            selectedWeatherVariable = selectedWeatherVariable,
+        )
+    }
 }
 
 @Composable
@@ -130,15 +175,21 @@ private fun DailyForecastContent(
     selectedWeatherVariable: WeatherVariable,
     onWeatherVariableChange: (WeatherVariable) -> Unit,
 ) {
-    WeatherVariableButtonGroup(
-        weatherVariables = TimeResolution.DAILY.weatherVariables,
-        selectedWeatherVariable = selectedWeatherVariable,
-        onSelect = onWeatherVariableChange,
-    )
-    DailyForecastList(
-        forecast = dailyForecast,
-        selectedWeatherVariable = selectedWeatherVariable,
-    )
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .fillMaxHeight()
+    ) {
+        WeatherVariableButtonGroup(
+            weatherVariables = TimeResolution.DAILY.weatherVariables,
+            selectedWeatherVariable = selectedWeatherVariable,
+            onSelect = onWeatherVariableChange,
+        )
+        DailyForecastList(
+            forecast = dailyForecast,
+            selectedWeatherVariable = selectedWeatherVariable,
+        )
+    }
 }
 
 private val TimeResolution.weatherVariables
