@@ -8,37 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cszsm.dolgok.forecast.presentation.TimeResolution
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 
-// TODO: rethink these once it's not experimental anymore
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun TimeResolutionButtonGroup(
-    selectedResolution: TimeResolution,
-    onSelect: (TimeResolution) -> Unit,
-) {
-    val resolutions = TimeResolution.entries
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-    ) {
-        resolutions.forEachIndexed { index, resolution ->
-            ToggleButton(
-                modifier = Modifier.weight(1f),
-                shapes = getToggleButtonShape(
-                    currentIndex = index,
-                    lastIndex = resolutions.lastIndex
-                ),
-                checked = selectedResolution == resolution,
-                onCheckedChange = { onSelect(resolution) },
-            ) {
-                Text(text = resolution.label)
-            }
-        }
-    }
-}
+// TODO: rethink this once it's not experimental anymore
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -74,12 +46,6 @@ private fun getToggleButtonShape(
     lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
 }
-
-private val TimeResolution.label
-    get() = when (this) {
-        TimeResolution.HOURLY -> "Hourly"
-        TimeResolution.DAILY -> "Daily"
-    }
 
 private val WeatherVariable.label
     get() = when (this) {
