@@ -2,5 +2,19 @@ package cszsm.dolgok.forecast.presentation
 
 enum class TimeResolution {
     HOURLY,
-    DAILY,
+    DAILY;
+
+    val weatherVariables
+        get() = when (this) {
+            HOURLY -> listOf(
+                WeatherVariable.TEMPERATURE,
+                WeatherVariable.RAIN,
+                WeatherVariable.PRESSURE
+            )
+
+            DAILY -> listOf(
+                WeatherVariable.TEMPERATURE,
+                WeatherVariable.RAIN,
+            )
+        }
 }
