@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
 import cszsm.dolgok.core.presentation.components.error.FullScreenError
@@ -91,6 +93,7 @@ private fun ForecastContent(
 
             HorizontalPager(
                 state = pagerState,
+                key = { index -> timeResolutions[index] },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -191,20 +194,6 @@ private fun DailyForecastContent(
         )
     }
 }
-
-private val TimeResolution.weatherVariables
-    get() = when (this) {
-        TimeResolution.HOURLY -> listOf(
-            WeatherVariable.TEMPERATURE,
-            WeatherVariable.RAIN,
-            WeatherVariable.PRESSURE
-        )
-
-        TimeResolution.DAILY -> listOf(
-            WeatherVariable.TEMPERATURE,
-            WeatherVariable.RAIN,
-        )
-    }
 
 private fun getPreviewTime(dayOfMonth: Int, hour: Int) =
     LocalDateTime(year = 2025, monthNumber = 3, dayOfMonth = dayOfMonth, hour = hour, minute = 0)
