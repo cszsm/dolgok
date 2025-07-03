@@ -29,7 +29,12 @@ class ForecastViewModel(
         _state.update { state ->
             state.copy(
                 selectedTimeResolution = selectedTimeResolution,
-                selectedWeatherVariable = if (state.selectedWeatherVariable in selectedTimeResolution.weatherVariables) state.selectedWeatherVariable else selectedTimeResolution.weatherVariables.first(),
+                selectedWeatherVariable =
+                    if (state.selectedWeatherVariable in selectedTimeResolution.weatherVariables) {
+                        state.selectedWeatherVariable
+                    } else {
+                        selectedTimeResolution.weatherVariables.first()
+                    },
             )
         }
         when (selectedTimeResolution) {

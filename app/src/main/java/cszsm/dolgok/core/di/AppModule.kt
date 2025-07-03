@@ -1,5 +1,6 @@
 package cszsm.dolgok.core.di
 
+import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
 import cszsm.dolgok.forecast.data.ForecastRepository
 import cszsm.dolgok.forecast.data.ForecastTransformer
 import cszsm.dolgok.forecast.data.WeatherDataSource
@@ -21,6 +22,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -30,6 +32,7 @@ import org.koin.dsl.module
 private const val WEATHER_BASE_URL = "api.open-meteo.com/v1/"
 
 val appModule = module {
+    single<Clock> { Clock.System }
     single<WeatherDataSource> {
         WeatherDataSourceImpl(
             client = HttpClient(OkHttp) {
@@ -42,6 +45,7 @@ val appModule = module {
             }
         )
     }
+    singleOf(::GetCurrentTimeUseCase)
     singleOf(::ForecastRepository)
     singleOf(::ForecastTransformer)
     singleOf(::GetHourlyForecastUseCase)

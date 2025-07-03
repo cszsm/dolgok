@@ -52,7 +52,7 @@ android {
     }
 
     tasks.withType<Test>().configureEach {
-        useJUnitPlatform {}
+        useJUnitPlatform()
     }
 }
 
@@ -77,8 +77,12 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
-    testImplementation(libs.junit)
+    testImplementation(libs.junit.core)
+    testImplementation(libs.junit.platform.engine)
+    testImplementation(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

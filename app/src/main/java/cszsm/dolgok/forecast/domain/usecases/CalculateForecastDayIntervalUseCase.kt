@@ -1,19 +1,21 @@
 package cszsm.dolgok.forecast.domain.usecases
 
-import cszsm.dolgok.forecast.domain.models.DateTimeInterval
-import cszsm.dolgok.forecast.domain.models.ForecastDay
+import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
 import cszsm.dolgok.core.util.minus
 import cszsm.dolgok.core.util.plus
 import cszsm.dolgok.core.util.roundDownToHour
 import cszsm.dolgok.core.util.toLocalDateTime
-import kotlinx.datetime.Clock
+import cszsm.dolgok.forecast.domain.models.DateTimeInterval
+import cszsm.dolgok.forecast.domain.models.ForecastDay
 
-class CalculateForecastDayIntervalUseCase {
+class CalculateForecastDayIntervalUseCase(
+    private val getCurrentTimeUseCase: GetCurrentTimeUseCase,
+) {
 
     operator fun invoke(
         forecastDay: ForecastDay,
     ): DateTimeInterval {
-        val now = Clock.System.now()
+        val now = getCurrentTimeUseCase()
 
         val forecastStart = now
             .plus(days = forecastDay.offset)
