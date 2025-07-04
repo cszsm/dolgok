@@ -18,8 +18,12 @@ fun WeatherVariableButtonGroup(
     weatherVariables: List<WeatherVariable>,
     selectedWeatherVariable: WeatherVariable,
     onSelect: (WeatherVariable) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+        modifier = modifier,
+    ) {
         weatherVariables.forEachIndexed { index, variable ->
             ToggleButton(
                 modifier = Modifier.weight(1f),

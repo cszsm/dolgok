@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.presentation.asPressure
 import cszsm.dolgok.core.presentation.asRain
@@ -25,10 +26,12 @@ private const val KEY_DAY_TODAY = "today"
 fun HourlyForecastList(
     forecast: HourlyForecast,
     selectedWeatherVariable: WeatherVariable,
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
+        modifier = modifier,
     ) {
         item(key = KEY_DAY_TODAY) {
             SectionHeader(text = "today")
