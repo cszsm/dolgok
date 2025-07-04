@@ -50,7 +50,7 @@ private fun SingleValueListItem(
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = title,
-                    style = Typography.bodyMedium,
+                    style = Typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .wrapContentSize()
@@ -67,7 +67,7 @@ private fun SingleValueListItem(
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = value,
-                    style = Typography.bodyMedium,
+                    style = Typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier
                         .wrapContentSize()

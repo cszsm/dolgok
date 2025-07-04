@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.presentation.asRain
 import cszsm.dolgok.core.presentation.asTemperature
@@ -17,10 +18,12 @@ import cszsm.dolgok.forecast.presentation.WeatherVariable
 fun DailyForecastList(
     forecast: DailyForecast,
     selectedWeatherVariable: WeatherVariable,
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
+        modifier = modifier,
     ) {
         forecast.days.forEachIndexed { index, forecastUnit ->
             val day = forecastUnit.date.dayOfWeek.toString().lowercase()
