@@ -42,15 +42,16 @@ fun ForecastScreen(
     viewModel: ForecastViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-    viewModel.init()
 
     ForecastContent(
         hourlyForecast = state.hourlyForecast,
+        hourlyForecastLoading = state.hourlyForecastLoading,
         dailyForecast = state.dailyForecast,
         selectedTimeResolution = state.selectedTimeResolution,
         selectedWeatherVariable = state.selectedWeatherVariable,
         onTimeResolutionSelect = viewModel::onTimeResolutionChange,
         onWeatherVariableChange = viewModel::onWeatherVariableChange,
+        onHourlyForecastEndReach = viewModel::loadHourlyForecastForTheNextDay,
     )
 }
 
@@ -58,11 +59,13 @@ fun ForecastScreen(
 @Composable
 private fun ForecastContent(
     hourlyForecast: Result<HourlyForecast, DataError>?,
+    hourlyForecastLoading: Boolean,
     dailyForecast: Result<DailyForecast, DataError>?,
     selectedTimeResolution: TimeResolution,
     selectedWeatherVariable: WeatherVariable,
     onTimeResolutionSelect: (TimeResolution) -> Unit,
     onWeatherVariableChange: (WeatherVariable) -> Unit,
+    onHourlyForecastEndReach: () -> Unit,
 ) {
     val timeResolutions = TimeResolution.entries
 
@@ -113,8 +116,10 @@ private fun ForecastContent(
                 ForecastPage(
                     selectedTimeResolution = timeResolutions[index],
                     hourlyForecast = hourlyForecast,
+                    hourlyForecastLoading = hourlyForecastLoading,
                     dailyForecast = dailyForecast,
                     selectedWeatherVariable = selectedWeatherVariable,
+                    onHourlyForecastEndReach = onHourlyForecastEndReach,
                 )
             }
         }
@@ -125,8 +130,10 @@ private fun ForecastContent(
 fun ForecastPage(
     selectedTimeResolution: TimeResolution,
     hourlyForecast: Result<HourlyForecast, DataError>?,
+    hourlyForecastLoading: Boolean,
     dailyForecast: Result<DailyForecast, DataError>?,
     selectedWeatherVariable: WeatherVariable,
+    onHourlyForecastEndReach: () -> Unit,
 ) {
     when (selectedTimeResolution) {
         TimeResolution.HOURLY -> {
@@ -135,7 +142,9 @@ fun ForecastPage(
 
                 is Result.Success -> HourlyForecastList(
                     forecast = hourlyForecast.data,
+                    loading = hourlyForecastLoading,
                     selectedWeatherVariable = selectedWeatherVariable,
+                    onEndReach = onHourlyForecastEndReach,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 12.dp)
@@ -199,10 +208,12 @@ private fun ForecastContent_Preview() {
     )
     ForecastContent(
         hourlyForecast = Result.Success(data = hourlyForecast),
+        hourlyForecastLoading = false,
         dailyForecast = null,
         selectedTimeResolution = TimeResolution.HOURLY,
         selectedWeatherVariable = WeatherVariable.TEMPERATURE,
         onTimeResolutionSelect = {},
         onWeatherVariableChange = {},
+        onHourlyForecastEndReach = {},
     )
 }

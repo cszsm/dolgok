@@ -1,8 +1,8 @@
 package cszsm.dolgok.forecast.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cszsm.dolgok.forecast.domain.models.ForecastDay
 import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +19,6 @@ class ForecastViewModel(
     private val _state = MutableStateFlow(ForecastState())
     val state: StateFlow<ForecastState> = _state.asStateFlow()
 
-    fun init() {
-        loadHourlyForecast()
-    }
-
     fun onTimeResolutionChange(
         selectedTimeResolution: TimeResolution,
     ) {
@@ -38,8 +34,11 @@ class ForecastViewModel(
             )
         }
         when (selectedTimeResolution) {
-            TimeResolution.HOURLY -> if (_state.value.hourlyForecast == null) loadHourlyForecast()
-            TimeResolution.DAILY -> if (_state.value.dailyForecast == null) loadDailyForecast()
+            TimeResolution.HOURLY ->
+                if (_state.value.hourlyForecastByDay.isEmpty()) loadHourlyForecast(forecastDay = ForecastDay.TODAY)
+
+            TimeResolution.DAILY ->
+                if (_state.value.dailyForecast == null) loadDailyForecast()
         }
     }
 
@@ -49,34 +48,51 @@ class ForecastViewModel(
         _state.update { state -> state.copy(selectedWeatherVariable = selectedWeatherVariable) }
     }
 
-    private fun loadHourlyForecast() {
+    fun loadHourlyForecastForTheNextDay() {
+        val lastLoadedDay = state.value.hourlyForecastByDay.entries.lastOrNull() ?: return
+        if (!lastLoadedDay.value.successful) return
+        val nextDay = lastLoadedDay.key.nextDay ?: return
+        loadHourlyForecast(forecastDay = nextDay)
+    }
+
+    private fun loadHourlyForecast(
+        forecastDay: ForecastDay,
+    ) {
+        if (state.value.hourlyForecastLoading) return
+
+        _state.update { state -> state.copy(hourlyForecastLoading = true) }
         viewModelScope.launch {
-            try {
-                val hourlyForecast = getHourlyForecastUseCase(
-                    latitude = LATITUDE,
-                    longitude = LONGITUDE,
+            val hourlyForecast = getHourlyForecastUseCase(
+                latitude = LATITUDE,
+                longitude = LONGITUDE,
+                forecastDay = forecastDay,
+            )
+            _state.update { state ->
+                val updatedForecast = state.hourlyForecastByDay.toMutableMap()
+                updatedForecast[forecastDay] = hourlyForecast
+
+                state.copy(
+                    hourlyForecastByDay = updatedForecast,
+                    hourlyForecastLoading = false,
                 )
-                _state.update { state ->
-                    state.copy(hourlyForecast = hourlyForecast)
-                }
-            } catch (e: Exception) {
-                Log.e(ForecastViewModel::class.simpleName, e.localizedMessage ?: UNKNOWN_ERROR)
             }
         }
     }
 
     private fun loadDailyForecast() {
+        if (state.value.dailyForecastLoading) return
+
+        _state.update { state -> state.copy(dailyForecastLoading = true) }
         viewModelScope.launch {
-            try {
-                val dailyForecast = getDailyForecastUseCase(
-                    latitude = LATITUDE,
-                    longitude = LONGITUDE,
+            val dailyForecast = getDailyForecastUseCase(
+                latitude = LATITUDE,
+                longitude = LONGITUDE,
+            )
+            _state.update { state ->
+                state.copy(
+                    dailyForecast = dailyForecast,
+                    dailyForecastLoading = false,
                 )
-                _state.update { state ->
-                    state.copy(dailyForecast = dailyForecast)
-                }
-            } catch (e: Exception) {
-                Log.e(ForecastViewModel::class.simpleName, e.localizedMessage ?: UNKNOWN_ERROR)
             }
         }
     }
@@ -84,7 +100,5 @@ class ForecastViewModel(
     private companion object {
         const val LATITUDE: Float = 47.50f
         const val LONGITUDE: Float = 19.04f
-
-        const val UNKNOWN_ERROR = "unknown error"
     }
 }

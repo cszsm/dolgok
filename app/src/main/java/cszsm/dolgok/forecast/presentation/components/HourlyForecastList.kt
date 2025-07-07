@@ -1,9 +1,13 @@
 package cszsm.dolgok.forecast.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.presentation.asPressure
@@ -25,10 +29,21 @@ private const val KEY_DAY_TODAY = "today"
 @Composable
 fun HourlyForecastList(
     forecast: HourlyForecast,
+    loading: Boolean,
     selectedWeatherVariable: WeatherVariable,
+    onEndReach: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState.canScrollForward) {
+        if (!listState.canScrollForward) {
+            onEndReach()
+        }
+    }
+
     LazyColumn(
+        state = listState,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
         modifier = modifier,
@@ -58,6 +73,12 @@ fun HourlyForecastList(
                         forcedBottom = forecastUnit.time.time == LAST_HOUR_OF_THE_DAY,
                     )
                 )
+            }
+        }
+
+        if (loading) {
+            item {
+                Text(text = "Loading")
             }
         }
     }

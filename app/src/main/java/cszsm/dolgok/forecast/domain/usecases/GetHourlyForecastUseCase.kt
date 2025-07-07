@@ -13,7 +13,7 @@ class GetHourlyForecastUseCase(
     suspend operator fun invoke(
         latitude: Float,
         longitude: Float,
-        forecastDay: ForecastDay = ForecastDay.TODAY,
+        forecastDay: ForecastDay,
     ): Result<HourlyForecast, DataError> {
         val interval = calculateForecastDayIntervalUseCase(forecastDay = forecastDay)
 
