@@ -59,6 +59,32 @@ class ForecastRepositoryTest {
         }
 
     @Test
+    fun `fetchHourlyForecast should return error result if the network call fails`() =
+        runTest {
+            // Given
+            coEvery {
+                mockWeatherDataSource.getHourlyForecast(
+                    latitude = LATITUDE,
+                    longitude = LONGITUDE,
+                    startHour = START_HOUR,
+                    endHour = END_HOUR,
+                )
+            } throws Exception()
+
+            // When
+            val actual = forecastRepository.fetchHourlyForecast(
+                latitude = LATITUDE,
+                longitude = LONGITUDE,
+                startHour = START_HOUR,
+                endHour = END_HOUR,
+            )
+
+            // Then
+            val expected = Result.Failure<HourlyForecast, DataError>(error = DataError.NETWORK)
+            assertEquals(expected, actual)
+        }
+
+    @Test
     fun `fetchHourlyForecast should return error result if the data source returns improper data`() =
         runTest {
             // Given

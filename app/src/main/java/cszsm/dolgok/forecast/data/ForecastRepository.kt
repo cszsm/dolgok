@@ -17,19 +17,27 @@ class ForecastRepository(
         startHour: LocalDateTime,
         endHour: LocalDateTime,
     ): Result<HourlyForecast, DataError> =
-        weatherDataSource.getHourlyForecast(
-            latitude = latitude,
-            longitude = longitude,
-            startHour = startHour,
-            endHour = endHour
-        ).let(forecastTransformer::transformHourly)
+        try {
+            weatherDataSource.getHourlyForecast(
+                latitude = latitude,
+                longitude = longitude,
+                startHour = startHour,
+                endHour = endHour
+            ).let(forecastTransformer::transformHourly)
+        } catch (e: Exception) {
+            Result.Failure(error = DataError.NETWORK)
+        }
 
     suspend fun fetchDailyForecast(
         latitude: Float,
         longitude: Float,
     ): Result<DailyForecast, DataError> =
-        weatherDataSource.getDailyForecast(
-            latitude = latitude,
-            longitude = longitude,
-        ).let(forecastTransformer::transformDaily)
+        try {
+            weatherDataSource.getDailyForecast(
+                latitude = latitude,
+                longitude = longitude,
+            ).let(forecastTransformer::transformDaily)
+        } catch (e: Exception) {
+            Result.Failure(error = DataError.NETWORK)
+        }
 }

@@ -47,36 +47,6 @@ class ForecastViewModelTest {
         Dispatchers.resetMain()
     }
 
-    //    @ExperimentalCoroutinesApi
-    @Test
-    fun `init should load hourly forecast`() = runTest {
-        // Given
-        coEvery {
-            mockGetHourlyForecastUseCase(
-                latitude = any(),
-                longitude = any(),
-                ForecastDay.TODAY,
-            )
-        } returns HOURLY_RESULT
-
-        // When
-        forecastViewModel.init()
-        advanceUntilIdle()
-
-        // Then
-        coVerify {
-            mockGetHourlyForecastUseCase(
-                latitude = any(),
-                longitude = any(),
-                forecastDay = ForecastDay.TODAY,
-            )
-        }
-        assertEquals(
-            forecastViewModel.state.value.hourlyForecast,
-            HOURLY_RESULT,
-        )
-    }
-
     @Test
     fun `onTimeResolutionChange should change the state and if the data is not fetched yet, should fetch it`() =
         runTest {
@@ -87,7 +57,7 @@ class ForecastViewModelTest {
                     longitude = any(),
                     ForecastDay.TODAY,
                 )
-            } returns HOURLY_RESULT
+            } returns HOURLY_RESULT_FOR_TODAY
             coEvery {
                 mockGetDailyForecastUseCase(
                     latitude = any(),
@@ -95,7 +65,7 @@ class ForecastViewModelTest {
                 )
             } returns DAILY_RESULT
 
-            forecastViewModel.init()
+            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
             advanceUntilIdle()
 
             // When
@@ -144,9 +114,9 @@ class ForecastViewModelTest {
                     longitude = any(),
                     ForecastDay.TODAY,
                 )
-            } returns HOURLY_RESULT
+            } returns HOURLY_RESULT_FOR_TODAY
 
-            forecastViewModel.init()
+            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
             advanceUntilIdle()
 
             // When
@@ -161,8 +131,74 @@ class ForecastViewModelTest {
             )
         }
 
+    @Test
+    fun `loadHourlyForecastForTheNextDay should load the forecast for the following day, if the last loaded day was loaded successfully`() =
+        runTest {
+            // Given
+            coEvery {
+                mockGetHourlyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                    ForecastDay.TODAY,
+                )
+            } returns HOURLY_RESULT_FOR_TODAY
+            coEvery {
+                mockGetHourlyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                    ForecastDay.TOMORROW,
+                )
+            } returns HOURLY_RESULT_FOR_TOMORROW
+
+            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
+            advanceUntilIdle()
+
+            // When
+            forecastViewModel.loadHourlyForecastForTheNextDay()
+            advanceUntilIdle()
+
+            // Then
+            val actual = forecastViewModel.state.value.hourlyForecastByDay
+            val expected = mapOf(
+                ForecastDay.TODAY to HOURLY_RESULT_FOR_TODAY,
+                ForecastDay.TOMORROW to HOURLY_RESULT_FOR_TOMORROW,
+            )
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `loadHourlyForecastForTheNextDay should not load the forecast for the following day, if the last loaded day was failed to load`() =
+        runTest {
+            // Given
+            coEvery {
+                mockGetHourlyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                    ForecastDay.TODAY,
+                )
+            } returns HOURLY_RESULT_ERROR
+
+            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
+            advanceUntilIdle()
+
+            // When
+            forecastViewModel.loadHourlyForecastForTheNextDay()
+            advanceUntilIdle()
+
+            // Then
+            coVerify(exactly = 0) {
+                mockGetHourlyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                    ForecastDay.TOMORROW,
+                )
+            }
+        }
+
     private companion object {
-        val HOURLY_RESULT: Result.Success<HourlyForecast, DataError> = mockk()
-        val DAILY_RESULT: Result.Success<DailyForecast, DataError> = mockk()
+        val HOURLY_RESULT_FOR_TODAY = Result.Success<HourlyForecast, DataError>(mockk())
+        val HOURLY_RESULT_FOR_TOMORROW = Result.Success<HourlyForecast, DataError>(mockk())
+        val HOURLY_RESULT_ERROR = Result.Failure<HourlyForecast, DataError>(mockk())
+        val DAILY_RESULT = Result.Success<DailyForecast, DataError>(mockk())
     }
 }
