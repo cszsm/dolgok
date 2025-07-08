@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import cszsm.dolgok.R
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 
 // TODO: rethink this once it's not experimental anymore
@@ -34,7 +36,7 @@ fun WeatherVariableButtonGroup(
                 checked = selectedWeatherVariable == variable,
                 onCheckedChange = { onSelect(variable) }
             ) {
-                Text(text = variable.label)
+                Text(text = variable.getLabel())
             }
         }
     }
@@ -51,9 +53,10 @@ private fun getToggleButtonShape(
     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
 }
 
-private val WeatherVariable.label
-    get() = when (this) {
-        WeatherVariable.TEMPERATURE -> "Temperature"
-        WeatherVariable.RAIN -> "Rain"
-        WeatherVariable.PRESSURE -> "Pressure"
+@Composable
+private fun WeatherVariable.getLabel() =
+    when (this) {
+        WeatherVariable.TEMPERATURE -> stringResource(R.string.forecast_weather_variable_temperature)
+        WeatherVariable.RAIN -> stringResource(R.string.forecast_weather_variable_rain)
+        WeatherVariable.PRESSURE -> stringResource(R.string.forecast_weather_variable_pressure)
     }

@@ -9,7 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import cszsm.dolgok.R
+import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.asPressure
 import cszsm.dolgok.core.presentation.asRain
 import cszsm.dolgok.core.presentation.asTemperature
@@ -20,6 +24,7 @@ import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 import kotlinx.datetime.LocalTime
+import java.time.format.TextStyle
 
 private val FIRST_HOUR_OF_THE_DAY = LocalTime(hour = 0, minute = 0)
 private val LAST_HOUR_OF_THE_DAY = LocalTime(hour = 23, minute = 0)
@@ -49,7 +54,7 @@ fun HourlyForecastList(
         modifier = modifier,
     ) {
         item(key = KEY_DAY_TODAY) {
-            SectionHeader(text = "today")
+            SectionHeader(text = stringResource(R.string.forecast_today))
         }
 
         forecast.hours.forEachIndexed { index, forecastUnit ->
@@ -57,7 +62,7 @@ fun HourlyForecastList(
             val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
 
             if (forecastUnit.time.time == LocalTime(hour = 0, minute = 0)) {
-                val day = forecastUnit.time.dayOfWeek.toString().lowercase()
+                val day = forecastUnit.time.asLocalizedDayOfWeek().lowercase()
                 item(key = day) {
                     SectionHeader(text = day)
                 }
@@ -78,7 +83,7 @@ fun HourlyForecastList(
 
         if (loading) {
             item {
-                Text(text = "Loading")
+                Text(text = stringResource(R.string.core_loading))
             }
         }
     }

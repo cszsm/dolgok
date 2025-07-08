@@ -20,13 +20,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cszsm.dolgok.R
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
 import cszsm.dolgok.core.presentation.components.error.FullScreenError
 import cszsm.dolgok.core.presentation.components.loading.FullScreenLoading
-import cszsm.dolgok.core.presentation.error.message
+import cszsm.dolgok.core.presentation.error.getMessage
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecastUnit
@@ -83,7 +85,7 @@ private fun ForecastContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Forecast")
+                    Text(text = stringResource(R.string.forecast_title))
                 }
             )
         },
@@ -150,7 +152,7 @@ fun ForecastPage(
                         .padding(horizontal = 12.dp)
                 )
 
-                is Result.Failure -> FullScreenError(message = hourlyForecast.error.message)
+                is Result.Failure -> FullScreenError(message = hourlyForecast.error.getMessage())
             }
         }
 
@@ -166,7 +168,7 @@ fun ForecastPage(
                         .fillMaxHeight()
                 )
 
-                is Result.Failure -> FullScreenError(message = dailyForecast.error.message)
+                is Result.Failure -> FullScreenError(message = dailyForecast.error.getMessage())
             }
         }
     }

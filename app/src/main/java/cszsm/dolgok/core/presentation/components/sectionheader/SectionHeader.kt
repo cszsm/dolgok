@@ -27,6 +27,6 @@ fun SectionHeader(
 
 @Preview
 @Composable
-private fun SectionHeader_Loading() {
+private fun SectionHeader_Preview() {
     SectionHeader(text = "tuesday")
 }

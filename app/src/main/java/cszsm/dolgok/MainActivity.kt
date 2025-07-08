@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cszsm.dolgok.forecast.presentation.ForecastScreen
 import cszsm.dolgok.lazycolumn.presentation.LazyColumnScreen
-import cszsm.dolgok.home.presentation.MainScreen
+import cszsm.dolgok.home.presentation.HomeScreen
 import cszsm.dolgok.core.presentation.theme.DolgokTheme
 import kotlinx.serialization.Serializable
 
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = Main,
                 ) {
                     composable<Main> {
-                        MainScreen(
+                        HomeScreen(
                             onNavigateToLazyColumn = {
                                 navController.navigate(
                                     route = LazyColumn

@@ -1,10 +1,14 @@
 package cszsm.dolgok.core.presentation.error
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import cszsm.dolgok.R
 import cszsm.dolgok.core.domain.error.DataError
 
-val DataError.message: String
-    get() = when (this) {
-        DataError.INCOMPLETE_DATA -> "Error: incomplete data"
-        DataError.WRONG_DATA_FORMAT -> "Error: wrong data format"
-        DataError.NETWORK -> "Error: network"
+@Composable
+fun DataError.getMessage() =
+    when (this) {
+        DataError.INCOMPLETE_DATA -> stringResource(R.string.core_error_incomplete_data)
+        DataError.WRONG_DATA_FORMAT -> stringResource(R.string.core_error_wrong_data_format)
+        DataError.NETWORK -> stringResource(R.string.core_error_network)
     }

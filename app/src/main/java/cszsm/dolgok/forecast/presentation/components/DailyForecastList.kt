@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.asRain
 import cszsm.dolgok.core.presentation.asTemperature
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItem
@@ -26,7 +27,7 @@ fun DailyForecastList(
         modifier = modifier,
     ) {
         forecast.days.forEachIndexed { index, forecastUnit ->
-            val day = forecastUnit.date.dayOfWeek.toString().lowercase()
+            val day = forecastUnit.date.asLocalizedDayOfWeek().lowercase()
             val forecastValue = forecastUnit.getLabel(weatherVariable = selectedWeatherVariable)
 
             item(key = forecastUnit.date.toString()) {
