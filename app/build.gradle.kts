@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
+    implementation(libs.google.play.services.location)
     testImplementation(libs.junit.core)
     testImplementation(libs.junit.platform.engine)
     testImplementation(libs.junit.platform.launcher)

@@ -2,6 +2,10 @@
 
 package cszsm.dolgok.forecast.presentation
 
+import android.Manifest
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -45,6 +50,17 @@ fun ForecastScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val locationPermissionResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            viewModel.onLocationPermissionResult(granted = granted)
+        }
+    )
+
+//    locationPermissionResultLauncher.launch(
+//        input = Manifest.permission.ACCESS_COARSE_LOCATION
+//    )
+
     ForecastContent(
         hourlyForecast = state.hourlyForecast,
         hourlyForecastLoading = state.hourlyForecastLoading,
@@ -54,6 +70,7 @@ fun ForecastScreen(
         onTimeResolutionSelect = viewModel::onTimeResolutionChange,
         onWeatherVariableChange = viewModel::onWeatherVariableChange,
         onHourlyForecastEndReach = viewModel::loadHourlyForecastForTheNextDay,
+        launcher = locationPermissionResultLauncher,
     )
 }
 
@@ -68,6 +85,7 @@ private fun ForecastContent(
     onTimeResolutionSelect: (TimeResolution) -> Unit,
     onWeatherVariableChange: (WeatherVariable) -> Unit,
     onHourlyForecastEndReach: () -> Unit,
+    launcher: ManagedActivityResultLauncher<String, Boolean>? = null,
 ) {
     val timeResolutions = TimeResolution.entries
 
@@ -85,7 +103,14 @@ private fun ForecastContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(R.string.forecast_title))
+//                    Text(text = stringResource(R.string.forecast_title))
+                    Button(
+                        onClick = {
+                            launcher?.launch(
+                                input = Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        }
+                    ) { Text("launch") }
                 }
             )
         },

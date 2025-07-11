@@ -1,5 +1,6 @@
 package cszsm.dolgok.forecast.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cszsm.dolgok.forecast.domain.models.ForecastDay
@@ -18,6 +19,10 @@ class ForecastViewModel(
 
     private val _state = MutableStateFlow(ForecastState())
     val state: StateFlow<ForecastState> = _state.asStateFlow()
+
+    fun onLocationPermissionResult(granted: Boolean) {
+        Log.d("dolgok", "location granted: $granted")
+    }
 
     fun onTimeResolutionChange(
         selectedTimeResolution: TimeResolution,
