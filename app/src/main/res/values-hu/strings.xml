@@ -13,5 +13,5 @@
     <string name="forecast_weather_variable_rain">Csapadék</string>
     <string name="forecast_weather_variable_temperature">Hőmérséklet</string>
     <string name="home_option_forecast">Előrejelzés</string>
-    <string name="home_option_lazy_column">LazyColumn</string>
+    <string name="home_option_animation">Animáció</string>
 </resources>

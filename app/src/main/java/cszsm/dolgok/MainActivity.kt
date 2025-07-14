@@ -4,13 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import cszsm.dolgok.forecast.presentation.ForecastScreen
-import cszsm.dolgok.lazycolumn.presentation.LazyColumnScreen
-import cszsm.dolgok.home.presentation.HomeScreen
+import cszsm.dolgok.animation.presentation.navigation.addAnimationGraph
 import cszsm.dolgok.core.presentation.theme.DolgokTheme
-import kotlinx.serialization.Serializable
+import cszsm.dolgok.forecast.presentation.navigation.addForecastGraph
+import cszsm.dolgok.home.presentation.navigation.HomeGraphRoute
+import cszsm.dolgok.home.presentation.navigation.addHomeGraph
 
 class MainActivity : ComponentActivity() {
 
@@ -23,34 +22,13 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = Main,
+                    startDestination = HomeGraphRoute,
                 ) {
-                    composable<Main> {
-                        HomeScreen(
-                            onNavigateToLazyColumn = {
-                                navController.navigate(
-                                    route = LazyColumn
-                                )
-                            },
-                            onNavigateToForecast = {
-                                navController.navigate(
-                                    route = Forecast
-                                )
-                            })
-                    }
-                    composable<LazyColumn> { LazyColumnScreen() }
-                    composable<Forecast> { ForecastScreen() }
+                    addHomeGraph(navHostController = navController)
+                    addForecastGraph()
+                    addAnimationGraph(navHostController = navController)
                 }
             }
         }
     }
 }
-
-@Serializable
-private object Main
-
-@Serializable
-private object LazyColumn
-
-@Serializable
-private object Forecast
