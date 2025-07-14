@@ -2,8 +2,8 @@ package cszsm.dolgok.forecast.domain.usecases
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
-import cszsm.dolgok.forecast.data.ForecastRepository
 import cszsm.dolgok.forecast.domain.models.DailyForecast
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest

@@ -2,9 +2,9 @@ package cszsm.dolgok.forecast.domain.usecases
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
-import cszsm.dolgok.forecast.data.ForecastRepository
 import cszsm.dolgok.forecast.domain.models.ForecastDay
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 
 class GetHourlyForecastUseCase(
     private val forecastRepository: ForecastRepository,

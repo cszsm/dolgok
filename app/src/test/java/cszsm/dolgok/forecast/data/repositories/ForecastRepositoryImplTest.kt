@@ -1,8 +1,10 @@
-package cszsm.dolgok.forecast.data
+package cszsm.dolgok.forecast.data.repositories
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
+import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
 import cszsm.dolgok.forecast.data.models.ForecastApiModel
+import cszsm.dolgok.forecast.data.transformers.ForecastTransformer
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import io.mockk.coEvery
@@ -14,16 +16,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class ForecastRepositoryTest {
+class ForecastRepositoryImplTest {
 
     private val mockWeatherDataSource: WeatherDataSource = mockk()
     private val mockForecastTransformer: ForecastTransformer = mockk()
 
-    private lateinit var forecastRepository: ForecastRepository
+    private lateinit var forecastRepositoryImpl: ForecastRepositoryImpl
 
     @BeforeEach
     fun setUp() {
-        forecastRepository = ForecastRepository(
+        forecastRepositoryImpl = ForecastRepositoryImpl(
             weatherDataSource = mockWeatherDataSource,
             forecastTransformer = mockForecastTransformer,
         )
@@ -46,7 +48,7 @@ class ForecastRepositoryTest {
             } returns Result.Success(data = HOURLY_FORECAST)
 
             // When
-            val actual = forecastRepository.fetchHourlyForecast(
+            val actual = forecastRepositoryImpl.fetchHourlyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
                 startHour = START_HOUR,
@@ -72,7 +74,7 @@ class ForecastRepositoryTest {
             } throws Exception()
 
             // When
-            val actual = forecastRepository.fetchHourlyForecast(
+            val actual = forecastRepositoryImpl.fetchHourlyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
                 startHour = START_HOUR,
@@ -101,7 +103,7 @@ class ForecastRepositoryTest {
             } returns Result.Failure(error = DataError.INCOMPLETE_DATA)
 
             // When
-            val actual = forecastRepository.fetchHourlyForecast(
+            val actual = forecastRepositoryImpl.fetchHourlyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
                 startHour = START_HOUR,
@@ -129,7 +131,7 @@ class ForecastRepositoryTest {
             } returns Result.Success(data = DAILY_FORECAST)
 
             // When
-            val actual = forecastRepository.fetchDailyForecast(
+            val actual = forecastRepositoryImpl.fetchDailyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
             )
@@ -154,7 +156,7 @@ class ForecastRepositoryTest {
             } returns Result.Failure(error = DataError.INCOMPLETE_DATA)
 
             // When
-            val actual = forecastRepository.fetchDailyForecast(
+            val actual = forecastRepositoryImpl.fetchDailyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
             )

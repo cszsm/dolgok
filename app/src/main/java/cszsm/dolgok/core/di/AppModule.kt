@@ -1,10 +1,11 @@
 package cszsm.dolgok.core.di
 
 import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
-import cszsm.dolgok.forecast.data.ForecastRepository
-import cszsm.dolgok.forecast.data.ForecastTransformer
-import cszsm.dolgok.forecast.data.WeatherDataSource
-import cszsm.dolgok.forecast.data.WeatherDataSourceImpl
+import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
+import cszsm.dolgok.forecast.data.datasources.WeatherDataSourceImpl
+import cszsm.dolgok.forecast.data.repositories.ForecastRepositoryImpl
+import cszsm.dolgok.forecast.data.transformers.ForecastTransformer
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import cszsm.dolgok.forecast.domain.usecases.CalculateForecastDayIntervalUseCase
 import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
@@ -46,7 +47,7 @@ val appModule = module {
         )
     }
     singleOf(::GetCurrentTimeUseCase)
-    singleOf(::ForecastRepository)
+    single<ForecastRepository> { ForecastRepositoryImpl(get(), get()) }
     singleOf(::ForecastTransformer)
     singleOf(::GetHourlyForecastUseCase)
     singleOf(::GetDailyForecastUseCase)

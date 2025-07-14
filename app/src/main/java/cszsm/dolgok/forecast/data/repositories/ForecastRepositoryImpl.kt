@@ -1,17 +1,20 @@
-package cszsm.dolgok.forecast.data
+package cszsm.dolgok.forecast.data.repositories
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
+import cszsm.dolgok.forecast.data.transformers.ForecastTransformer
+import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import kotlinx.datetime.LocalDateTime
 
-class ForecastRepository(
+class ForecastRepositoryImpl(
     private val weatherDataSource: WeatherDataSource,
     private val forecastTransformer: ForecastTransformer,
-) {
+) : ForecastRepository {
 
-    suspend fun fetchHourlyForecast(
+    override suspend fun fetchHourlyForecast(
         latitude: Float,
         longitude: Float,
         startHour: LocalDateTime,
@@ -28,7 +31,7 @@ class ForecastRepository(
             Result.Failure(error = DataError.NETWORK)
         }
 
-    suspend fun fetchDailyForecast(
+    override suspend fun fetchDailyForecast(
         latitude: Float,
         longitude: Float,
     ): Result<DailyForecast, DataError> =

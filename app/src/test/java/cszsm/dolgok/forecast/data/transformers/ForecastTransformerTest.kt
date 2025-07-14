@@ -1,4 +1,4 @@
-package cszsm.dolgok.forecast.data
+package cszsm.dolgok.forecast.data.transformers
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
