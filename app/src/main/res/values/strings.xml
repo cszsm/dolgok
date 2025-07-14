@@ -13,5 +13,5 @@
     <string name="forecast_weather_variable_rain">Rain</string>
     <string name="forecast_weather_variable_temperature">Temperature</string>
     <string name="home_option_forecast">Forecast</string>
-    <string name="home_option_lazy_column">LazyColumn</string>
+    <string name="home_option_animation">Animation</string>
 </resources>
