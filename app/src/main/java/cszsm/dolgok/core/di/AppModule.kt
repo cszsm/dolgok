@@ -1,5 +1,9 @@
 package cszsm.dolgok.core.di
 
+import cszsm.dolgok.animation.domain.usecases.GetComplexDataPart1UseCase
+import cszsm.dolgok.animation.domain.usecases.GetComplexDataPart2UseCase
+import cszsm.dolgok.animation.domain.usecases.GetSimpleDataUseCase
+import cszsm.dolgok.animation.presentation.viewmodels.ProgressIndicatorViewModel
 import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSourceImpl
@@ -52,7 +56,11 @@ val appModule = module {
     singleOf(::GetHourlyForecastUseCase)
     singleOf(::GetDailyForecastUseCase)
     singleOf(::CalculateForecastDayIntervalUseCase)
+    singleOf(::GetSimpleDataUseCase)
+    singleOf(::GetComplexDataPart1UseCase)
+    singleOf(::GetComplexDataPart2UseCase)
     viewModelOf(::ForecastViewModel)
+    viewModelOf(::ProgressIndicatorViewModel)
 }
 
 private fun <T : HttpClientEngineConfig> (HttpClientConfig<T>).common() {
