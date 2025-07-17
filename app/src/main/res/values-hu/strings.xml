@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="animation_progress_ready">Kész</string>
     <string name="app_name">Dolgok</string>
+    <string name="core_command_cancel">Mégse</string>
+    <string name="core_command_load">Betöltés</string>
+    <string name="core_command_reset">Visszaállítás</string>
     <string name="core_error_incomplete_data">hiba: hiányos adat</string>
     <string name="core_error_network">hiba: hálózati hiba</string>
     <string name="core_error_wrong_data_format">hiba: hibás adatformátum</string>
