@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.presentation.theme.Typography
@@ -45,13 +46,15 @@ private fun SingleValueListItem(
         Surface(
             shape = shapes.leadingShape,
             color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.weight(6f),
+            modifier = Modifier.weight(3f),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = title,
-                    style = Typography.bodySmall,
+                    style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .wrapContentSize()
                         .align(Alignment.CenterStart)
@@ -62,13 +65,15 @@ private fun SingleValueListItem(
         Surface(
             shape = shapes.trailingShape,
             color = MaterialTheme.colorScheme.secondaryContainer,
-            modifier = Modifier.weight(4f),
+            modifier = Modifier.weight(7f),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = value,
-                    style = Typography.bodySmall,
+                    style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .wrapContentSize()
                         .align(Alignment.Center)

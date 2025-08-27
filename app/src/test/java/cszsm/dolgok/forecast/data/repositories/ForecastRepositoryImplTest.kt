@@ -3,7 +3,6 @@ package cszsm.dolgok.forecast.data.repositories
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
-import cszsm.dolgok.forecast.data.models.ForecastApiModel
 import cszsm.dolgok.forecast.data.transformers.ForecastTransformer
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast

@@ -1,8 +1,7 @@
 package cszsm.dolgok.forecast.domain.usecases
 
 import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
-import cszsm.dolgok.forecast.domain.models.DateTimeInterval
-import cszsm.dolgok.forecast.domain.models.ForecastDay
+import cszsm.dolgok.core.domain.model.DateTimeInterval
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.datetime.Instant

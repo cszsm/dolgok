@@ -1,4 +1,4 @@
-package cszsm.dolgok.forecast.domain.models
+package cszsm.dolgok.core.domain.model
 
 import kotlinx.datetime.LocalDateTime
 

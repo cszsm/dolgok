@@ -18,7 +18,7 @@ fun SectionHeader(
     Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = text,
-            style = Typography.titleSmall,
+            style = Typography.titleMedium,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
         )

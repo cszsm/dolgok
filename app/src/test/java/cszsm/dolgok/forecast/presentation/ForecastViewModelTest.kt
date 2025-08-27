@@ -3,10 +3,7 @@ package cszsm.dolgok.forecast.presentation
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
 import cszsm.dolgok.forecast.domain.models.DailyForecast
-import cszsm.dolgok.forecast.domain.models.ForecastDay
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
-import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -2,7 +2,6 @@ package cszsm.dolgok.forecast.data.transformers
 
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.domain.result.Result
-import cszsm.dolgok.forecast.data.models.ForecastApiModel
 import cszsm.dolgok.forecast.data.models.ForecastDataApiModel
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.DailyForecastUnit

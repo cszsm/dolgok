@@ -2,9 +2,12 @@ package cszsm.dolgok.forecast.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cszsm.dolgok.forecast.domain.models.ForecastDay
-import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
+import cszsm.dolgok.core.domain.model.LoadedData
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
+import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,88 +15,122 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ForecastViewModel(
-    private val getHourlyForecastUseCase: GetHourlyForecastUseCase,
-    private val getDailyForecastUseCase: GetDailyForecastUseCase,
+    private val forecastRepository: ForecastRepository,
+    private val fetchFirstDayHourlyForecastUseCase: FetchFirstDayHourlyForecastUseCase,
+    private val fetchMoreHourlyForecastUseCase: FetchMoreHourlyForecastUseCase,
+    private val fetchDailyForecastUseCase: FetchDailyForecastUseCase,
+    private val isMoreForecastAllowedUseCase: IsMoreForecastAllowedUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ForecastState())
-    val state: StateFlow<ForecastState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(ForecastScreenState())
+    val state: StateFlow<ForecastScreenState> = _state.asStateFlow()
 
-    fun onTimeResolutionChange(
-        selectedTimeResolution: TimeResolution,
+    init {
+        collectForecasts()
+    }
+
+    fun onEvent(event: ForecastScreenEvent) {
+        when (event) {
+            is ForecastScreenEvent.TimeResolutionChange -> onTimeResolutionChange(timeResolution = event.timeResolution)
+            is ForecastScreenEvent.WeatherVariableChange -> onWeatherVariableChange(
+                weatherVariable = event.weatherVariable
+            )
+
+            ForecastScreenEvent.HourlyForecastEndReach -> fetchMoreHourlyForecast()
+        }
+    }
+
+    private fun collectForecasts() {
+        viewModelScope.launch {
+            forecastRepository.hourlyForecastStream.collect { hourlyForecast ->
+                _state.update {
+                    it.copy(
+                        hourlyForecastState = it.hourlyForecastState.copy(
+                            forecast = hourlyForecast?.data,
+                            loading = hourlyForecast is LoadedData.Loading,
+                            error = (hourlyForecast as? LoadedData.Failure)?.error,
+                        )
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            forecastRepository.dailyForecastStream.collect { dailyForecast ->
+                _state.update {
+                    it.copy(
+                        dailyForecastState = it.dailyForecastState.copy(
+                            forecast = dailyForecast?.data,
+                            loading = dailyForecast is LoadedData.Loading,
+                            error = (dailyForecast as? LoadedData.Failure)?.error,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun onTimeResolutionChange(
+        timeResolution: TimeResolution,
     ) {
         _state.update { state ->
             state.copy(
-                selectedTimeResolution = selectedTimeResolution,
+                selectedTimeResolution = timeResolution,
                 selectedWeatherVariable =
-                    if (state.selectedWeatherVariable in selectedTimeResolution.weatherVariables) {
+                    if (state.selectedWeatherVariable in timeResolution.weatherVariables) {
                         state.selectedWeatherVariable
                     } else {
-                        selectedTimeResolution.weatherVariables.first()
+                        timeResolution.weatherVariables.first()
                     },
             )
         }
-        when (selectedTimeResolution) {
+        when (timeResolution) {
             TimeResolution.HOURLY ->
-                if (_state.value.hourlyForecastByDay.isEmpty()) loadHourlyForecast(forecastDay = ForecastDay.TODAY)
+                if (_state.value.hourlyForecastState.forecast == null) fetchFirstDayHourlyForecast()
 
             TimeResolution.DAILY ->
-                if (_state.value.dailyForecast == null) loadDailyForecast()
+                if (_state.value.dailyForecastState.forecast == null) fetchDailyForecast()
         }
     }
 
-    fun onWeatherVariableChange(
-        selectedWeatherVariable: WeatherVariable,
+    private fun onWeatherVariableChange(
+        weatherVariable: WeatherVariable,
     ) {
-        _state.update { state -> state.copy(selectedWeatherVariable = selectedWeatherVariable) }
+        _state.update { state -> state.copy(selectedWeatherVariable = weatherVariable) }
     }
 
-    fun loadHourlyForecastForTheNextDay() {
-        val lastLoadedDay = state.value.hourlyForecastByDay.entries.lastOrNull() ?: return
-        if (!lastLoadedDay.value.successful) return
-        val nextDay = lastLoadedDay.key.nextDay ?: return
-        loadHourlyForecast(forecastDay = nextDay)
-    }
-
-    private fun loadHourlyForecast(
-        forecastDay: ForecastDay,
-    ) {
-        if (state.value.hourlyForecastLoading) return
-
-        _state.update { state -> state.copy(hourlyForecastLoading = true) }
+    private fun fetchFirstDayHourlyForecast() {
         viewModelScope.launch {
-            val hourlyForecast = getHourlyForecastUseCase(
+            fetchFirstDayHourlyForecastUseCase(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
-                forecastDay = forecastDay,
             )
-            _state.update { state ->
-                val updatedForecast = state.hourlyForecastByDay.toMutableMap()
-                updatedForecast[forecastDay] = hourlyForecast
-
-                state.copy(
-                    hourlyForecastByDay = updatedForecast,
-                    hourlyForecastLoading = false,
-                )
-            }
         }
     }
 
-    private fun loadDailyForecast() {
-        if (state.value.dailyForecastLoading) return
+    private fun fetchMoreHourlyForecast() {
+        val lastLoadedDateTime =
+            state.value.hourlyForecastState.forecast?.hours?.keys?.lastOrNull() ?: return
+        if (!isMoreForecastAllowedUseCase(lastLoadedForecastDateTime = lastLoadedDateTime)) return
 
-        _state.update { state -> state.copy(dailyForecastLoading = true) }
         viewModelScope.launch {
-            val dailyForecast = getDailyForecastUseCase(
+            fetchMoreHourlyForecastUseCase(
+                latitude = LATITUDE,
+                longitude = LONGITUDE,
+                lastLoadedDateTime = lastLoadedDateTime,
+            )
+        }
+    }
+
+    private fun fetchDailyForecast() {
+        _state.update {
+            it.copy(dailyForecastState = it.dailyForecastState.copy(loading = true))
+        }
+        viewModelScope.launch {
+            fetchDailyForecastUseCase(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
             )
-            _state.update { state ->
-                state.copy(
-                    dailyForecast = dailyForecast,
-                    dailyForecastLoading = false,
-                )
-            }
         }
     }
 
