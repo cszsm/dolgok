@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="animation_progress_indicator">Progress indicator</string>
+    <string name="animation_progress_ready">Ready</string>
+    <string name="app_name">Dolgok</string>
+    <string name="core_command_cancel">Cancel</string>
+    <string name="core_command_load">Load</string>
+    <string name="core_command_reset">Reset</string>
+    <string name="core_error_incomplete_data">error: incomplete data</string>
+    <string name="core_error_network">error: network error</string>
+    <string name="core_error_wrong_data_format">error: wrong data format</string>
+    <string name="core_loading">loading…</string>
+    <string name="forecast_time_resolution_daily">Daily</string>
+    <string name="forecast_time_resolution_hourly">Hourly</string>
+    <string name="forecast_title">Forecast</string>
+    <string name="forecast_today">today</string>
+    <string name="forecast_weather_variable_pressure">Pressure</string>
+    <string name="forecast_weather_variable_rain">Rain</string>
+    <string name="forecast_weather_variable_temperature">Temperature</string>
+    <string name="home_option_forecast">Forecast</string>
+    <string name="home_option_animation">Animation</string>
+</resources>
