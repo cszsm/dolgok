@@ -56,5 +56,8 @@ koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidBuildTools = { id = "com.android.tools.build:gradle-api", version.ref = "agp" }
 

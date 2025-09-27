@@ -21,3 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dolgok"
 include(":app")
+include(":animation")
+include(":localization")
+include(":forecast")
+include(":core")
+include(":home")
