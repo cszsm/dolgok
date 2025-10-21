@@ -1,8 +1,8 @@
-package cszsm.dolgok.forecast.domain.models
+package cszsm.dolgok.core.domain.models
 
 import kotlinx.datetime.LocalDateTime
 
-internal data class DateTimeInterval(
+data class DateTimeInterval(
     val start: LocalDateTime,
     val end: LocalDateTime,
 )

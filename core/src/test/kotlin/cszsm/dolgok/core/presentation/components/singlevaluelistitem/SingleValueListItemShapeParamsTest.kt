@@ -25,6 +25,7 @@ internal class SingleValueListItemShapeParamsTest {
     private companion object {
         @Suppress("unused")
         val toItemShapes = listOf(
+            // TODO: check this case
             Pair(
                 SingleValueListItemShapeParams(index = 0, size = 1),
                 SingleValueListItemShapes.Single,

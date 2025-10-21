@@ -1,6 +1,7 @@
 package cszsm.dolgok.forecast.data.datasources
 
-import cszsm.dolgok.forecast.data.models.ForecastApiModel
+import cszsm.dolgok.forecast.data.models.DailyForecastApiModel
+import cszsm.dolgok.forecast.data.models.HourlyForecastApiModel
 import kotlinx.datetime.LocalDateTime
 
 internal interface WeatherDataSource {
@@ -11,11 +12,11 @@ internal interface WeatherDataSource {
         longitude: Float,
         startHour: LocalDateTime,
         endHour: LocalDateTime,
-    ): ForecastApiModel?
+    ): HourlyForecastApiModel
 
     // https://api.open-meteo.com/v1//forecast?latitude=47.5&longitude=19.04&timezone=auto&daily=temperature_2m_max%2Ctemperature_2m_min%2Crain_sum
     suspend fun getDailyForecast(
         latitude: Float,
         longitude: Float,
-    ): ForecastApiModel?
+    ): DailyForecastApiModel
 }
