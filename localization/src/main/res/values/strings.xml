@@ -8,6 +8,7 @@
     <string name="core_command_reset">Reset</string>
     <string name="core_error_incomplete_data">error: incomplete data</string>
     <string name="core_error_network">error: network error</string>
+    <string name="core_error_unknown">error: unknown error</string>
     <string name="core_error_wrong_data_format">error: wrong data format</string>
     <string name="core_loading">loading…</string>
     <string name="forecast_time_resolution_daily">Daily</string>

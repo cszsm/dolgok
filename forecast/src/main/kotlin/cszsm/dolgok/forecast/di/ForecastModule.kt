@@ -2,12 +2,15 @@ package cszsm.dolgok.forecast.di
 
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSourceImpl
+import cszsm.dolgok.forecast.data.mappers.DailyForecastMapper
+import cszsm.dolgok.forecast.data.mappers.HourlyForecastMapper
 import cszsm.dolgok.forecast.data.repositories.ForecastRepositoryImpl
-import cszsm.dolgok.forecast.data.transformers.ForecastTransformer
 import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
-import cszsm.dolgok.forecast.domain.usecases.CalculateForecastDayIntervalUseCase
-import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.CalculateNextDayIntervalUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
 import cszsm.dolgok.forecast.presentation.ForecastViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -43,11 +46,14 @@ val forecastModule = module {
             }
         )
     }
-    single<ForecastRepository> { ForecastRepositoryImpl(get(), get()) }
-    singleOf(::ForecastTransformer)
-    singleOf(::GetHourlyForecastUseCase)
-    singleOf(::GetDailyForecastUseCase)
-    singleOf(::CalculateForecastDayIntervalUseCase)
+    single<ForecastRepository> { ForecastRepositoryImpl(get(), get(), get()) }
+    singleOf(::HourlyForecastMapper)
+    singleOf(::DailyForecastMapper)
+    singleOf(::FetchFirstDayHourlyForecastUseCase)
+    singleOf(::FetchMoreHourlyForecastUseCase)
+    singleOf(::FetchDailyForecastUseCase)
+    singleOf(::CalculateNextDayIntervalUseCase)
+    singleOf(::IsMoreForecastAllowedUseCase)
     viewModelOf(::ForecastViewModel)
 }
 

@@ -1,23 +1,29 @@
 package cszsm.dolgok.forecast.presentation
 
-import cszsm.dolgok.core.domain.error.DataError
-import cszsm.dolgok.core.domain.result.Result
+import cszsm.dolgok.core.domain.models.FetchedData
 import cszsm.dolgok.forecast.domain.models.DailyForecast
-import cszsm.dolgok.forecast.domain.models.ForecastDay
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
-import cszsm.dolgok.forecast.domain.usecases.GetDailyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase
-import io.mockk.coEvery
+import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
+import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -27,19 +33,19 @@ import org.junit.jupiter.api.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class ForecastViewModelTest {
 
-    private val mockGetHourlyForecastUseCase: cszsm.dolgok.forecast.domain.usecases.GetHourlyForecastUseCase = mockk()
-    private val mockGetDailyForecastUseCase: GetDailyForecastUseCase = mockk()
+    private val mockForecastRepository: ForecastRepository = mockk(relaxed = true)
+    private val mockFetchFirstDayHourlyForecastUseCase: FetchFirstDayHourlyForecastUseCase =
+        mockk(relaxed = true)
+    private val mockFetchMoreHourlyForecastUseCase: FetchMoreHourlyForecastUseCase =
+        mockk(relaxed = true)
+    private val mockFetchDailyForecastUseCase: FetchDailyForecastUseCase = mockk(relaxed = true)
+    private val mockIsMoreForecastAllowedUseCase: IsMoreForecastAllowedUseCase = mockk()
 
     private lateinit var forecastViewModel: ForecastViewModel
 
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher(TestCoroutineScheduler()))
-
-        forecastViewModel = ForecastViewModel(
-            getHourlyForecastUseCase = mockGetHourlyForecastUseCase,
-            getDailyForecastUseCase = mockGetDailyForecastUseCase,
-        )
     }
 
     @AfterEach
@@ -48,81 +54,116 @@ internal class ForecastViewModelTest {
     }
 
     @Test
-    fun `onTimeResolutionChange should change the state and if the data is not fetched yet, should fetch it`() =
+    fun `event onTimeResolutionChange with HOURLY should change the state and if the data is not fetched yet, should fetch it`() =
         runTest {
             // Given
-            coEvery {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TODAY,
-                )
-            } returns HOURLY_RESULT_FOR_TODAY
-            coEvery {
-                mockGetDailyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                )
-            } returns DAILY_RESULT
-
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
+            initForecastViewModel(hourlyForecast = FetchedData(), dailyForecast = FetchedData())
 
             // When
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.DAILY)
-            advanceUntilIdle()
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.DAILY)
-            advanceUntilIdle()
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.DAILY)
+            forecastViewModel.onEvent(ForecastScreenEvent.TimeResolutionChange(TimeResolution.HOURLY))
             advanceUntilIdle()
 
             // Then
-            coVerify(exactly = 1) {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    forecastDay = ForecastDay.TODAY,
-                )
-            }
-            coVerify(exactly = 1) {
-                mockGetDailyForecastUseCase(
+            assertEquals(
+                forecastViewModel.state.value.selectedTimeResolution,
+                TimeResolution.HOURLY,
+            )
+            coVerify {
+                mockFetchFirstDayHourlyForecastUseCase(
                     latitude = any(),
                     longitude = any(),
                 )
             }
+        }
+
+    @Test
+    fun `event onTimeResolutionChange with HOURLY should change the state and if the data is fetched already, should not fetch it`() =
+        runTest {
+            // Given
+            initForecastViewModel(
+                hourlyForecast = FetchedData(HOURLY_FORECAST),
+                dailyForecast = FetchedData()
+            )
+
+            // When
+            forecastViewModel.onEvent(ForecastScreenEvent.TimeResolutionChange(TimeResolution.HOURLY))
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(
+                forecastViewModel.state.value.selectedTimeResolution,
+                TimeResolution.HOURLY,
+            )
+            coVerify(exactly = 0) {
+                mockFetchFirstDayHourlyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `event onTimeResolutionChange with DAILY should change the state and if the data is not fetched yet, should fetch it`() =
+        runTest {
+            // Given
+            initForecastViewModel(hourlyForecast = FetchedData(), dailyForecast = FetchedData())
+
+            // When
+            forecastViewModel.onEvent(ForecastScreenEvent.TimeResolutionChange(TimeResolution.DAILY))
+            advanceUntilIdle()
+
+            // Then
             assertEquals(
                 forecastViewModel.state.value.selectedTimeResolution,
                 TimeResolution.DAILY,
             )
-            assertEquals(
-                forecastViewModel.state.value.dailyForecast,
-                DAILY_RESULT,
-            )
+            coVerify {
+                mockFetchDailyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                )
+            }
         }
 
     @Test
-    fun `onWeatherVariableChange should change the state`() =
+    fun `event onTimeResolutionChange with DAILY should change the state and if the data is fetched already, should not fetch it`() =
         runTest {
             // Given
-            coEvery {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TODAY,
+            initForecastViewModel(
+                hourlyForecast = FetchedData(), dailyForecast = FetchedData(
+                    DAILY_FORECAST
                 )
-            } returns HOURLY_RESULT_FOR_TODAY
-
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
+            )
 
             // When
-            forecastViewModel.onWeatherVariableChange(
-                selectedWeatherVariable = WeatherVariable.RAIN,
+            forecastViewModel.onEvent(ForecastScreenEvent.TimeResolutionChange(TimeResolution.DAILY))
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(
+                forecastViewModel.state.value.selectedTimeResolution,
+                TimeResolution.DAILY,
             )
+            coVerify(exactly = 0) {
+                mockFetchDailyForecastUseCase(
+                    latitude = any(),
+                    longitude = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `event onWeatherVariableChange should change the state`() =
+        runTest {
+            // Given
+            initForecastViewModel(
+                hourlyForecast = FetchedData(HOURLY_FORECAST),
+                dailyForecast = FetchedData()
+            )
+            forecastViewModel.onEvent(ForecastScreenEvent.TimeResolutionChange(timeResolution = TimeResolution.HOURLY))
+
+            // When
+            forecastViewModel.onEvent(ForecastScreenEvent.WeatherVariableChange(weatherVariable = WeatherVariable.RAIN))
 
             // Then
             assertEquals(
@@ -132,73 +173,100 @@ internal class ForecastViewModelTest {
         }
 
     @Test
-    fun `loadHourlyForecastForTheNextDay should load the forecast for the following day, if the last loaded day was loaded successfully`() =
-        runTest {
-            // Given
-            coEvery {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TODAY,
-                )
-            } returns HOURLY_RESULT_FOR_TODAY
-            coEvery {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TOMORROW,
-                )
-            } returns HOURLY_RESULT_FOR_TOMORROW
+    fun `event HourlyForecastEndReach should load more forecast if allowed`() = runTest {
+        // Given
+        initForecastViewModel(
+            hourlyForecast = FetchedData(HOURLY_FORECAST),
+            dailyForecast = FetchedData()
+        )
+        every {
+            mockIsMoreForecastAllowedUseCase(lastLoadedForecastDateTime = LOCAL_DATE_TIME)
+        } returns true
 
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
+        // When
+        forecastViewModel.onEvent(ForecastScreenEvent.HourlyForecastEndReach)
+        advanceUntilIdle()
 
-            // When
-            forecastViewModel.loadHourlyForecastForTheNextDay()
-            advanceUntilIdle()
-
-            // Then
-            val actual = forecastViewModel.state.value.hourlyForecastByDay
-            val expected = mapOf(
-                ForecastDay.TODAY to HOURLY_RESULT_FOR_TODAY,
-                ForecastDay.TOMORROW to HOURLY_RESULT_FOR_TOMORROW,
+        // Then
+        coVerify {
+            mockFetchMoreHourlyForecastUseCase(
+                latitude = any(),
+                longitude = any(),
+                lastLoadedDateTime = LOCAL_DATE_TIME,
             )
-            assertEquals(expected, actual)
         }
+    }
 
     @Test
-    fun `loadHourlyForecastForTheNextDay should not load the forecast for the following day, if the last loaded day was failed to load`() =
-        runTest {
-            // Given
-            coEvery {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TODAY,
-                )
-            } returns HOURLY_RESULT_ERROR
+    fun `event HourlyForecastEndReach should not load more forecast if not allowed`() = runTest {
+        // Given
+        initForecastViewModel(
+            hourlyForecast = FetchedData(HOURLY_FORECAST),
+            dailyForecast = FetchedData()
+        )
+        every {
+            mockIsMoreForecastAllowedUseCase(lastLoadedForecastDateTime = LOCAL_DATE_TIME)
+        } returns false
 
-            forecastViewModel.onTimeResolutionChange(selectedTimeResolution = TimeResolution.HOURLY)
-            advanceUntilIdle()
+        // When
+        forecastViewModel.onEvent(ForecastScreenEvent.HourlyForecastEndReach)
+        advanceUntilIdle()
 
-            // When
-            forecastViewModel.loadHourlyForecastForTheNextDay()
-            advanceUntilIdle()
-
-            // Then
-            coVerify(exactly = 0) {
-                mockGetHourlyForecastUseCase(
-                    latitude = any(),
-                    longitude = any(),
-                    ForecastDay.TOMORROW,
-                )
-            }
+        // Then
+        coVerify(exactly = 0) {
+            mockFetchMoreHourlyForecastUseCase(
+                latitude = any(),
+                longitude = any(),
+                lastLoadedDateTime = LOCAL_DATE_TIME,
+            )
         }
+    }
+
+    // TODO: check whether testing streams could be improved
+    private fun TestScope.initForecastViewModel(
+        hourlyForecast: FetchedData<HourlyForecast>,
+        dailyForecast: FetchedData<DailyForecast>,
+    ) {
+        every {
+            mockForecastRepository.hourlyForecastStream
+        } returns MutableStateFlow(hourlyForecast)
+        every {
+            mockForecastRepository.dailyForecastStream
+        } returns MutableStateFlow(dailyForecast)
+
+        forecastViewModel = ForecastViewModel(
+            forecastRepository = mockForecastRepository,
+            fetchFirstDayHourlyForecastUseCase = mockFetchFirstDayHourlyForecastUseCase,
+            fetchMoreHourlyForecastUseCase = mockFetchMoreHourlyForecastUseCase,
+            fetchDailyForecastUseCase = mockFetchDailyForecastUseCase,
+            isMoreForecastAllowedUseCase = mockIsMoreForecastAllowedUseCase,
+        )
+        advanceUntilIdle()
+    }
 
     private companion object {
-        val HOURLY_RESULT_FOR_TODAY = cszsm.dolgok.core.domain.result.Result.Success<HourlyForecast, cszsm.dolgok.core.domain.error.DataError>(mockk())
-        val HOURLY_RESULT_FOR_TOMORROW = cszsm.dolgok.core.domain.result.Result.Success<HourlyForecast, cszsm.dolgok.core.domain.error.DataError>(mockk())
-        val HOURLY_RESULT_ERROR = cszsm.dolgok.core.domain.result.Result.Failure<HourlyForecast, cszsm.dolgok.core.domain.error.DataError>(mockk())
-        val DAILY_RESULT = cszsm.dolgok.core.domain.result.Result.Success<DailyForecast, cszsm.dolgok.core.domain.error.DataError>(mockk())
+        val LOCAL_DATE = LocalDate(year = 2025, monthNumber = 10, dayOfMonth = 20)
+        val LOCAL_DATE_TIME = LocalDateTime(
+            date = LOCAL_DATE,
+            time = LocalTime(hour = 16, minute = 0, second = 0, nanosecond = 0),
+        )
+        val HOURLY_FORECAST = HourlyForecast(
+            hours = mapOf(
+                LOCAL_DATE_TIME to HourlyForecast.Variables(
+                    temperature = 13.8f,
+                    rain = 0f,
+                    pressure = 1001.4f,
+                )
+            )
+        )
+        val DAILY_FORECAST = DailyForecast(
+            days = mapOf(
+                LOCAL_DATE to DailyForecast.Variables(
+                    temperatureMax = 13.8f,
+                    temperatureMin = 4.8f,
+                    rainSum = 0f,
+                )
+            )
+        )
     }
 }
