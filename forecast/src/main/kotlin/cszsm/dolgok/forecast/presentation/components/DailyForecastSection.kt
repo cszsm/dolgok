@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cszsm.dolgok.core.domain.models.FetchedData
 import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.asRain
 import cszsm.dolgok.core.presentation.asTemperature
@@ -18,21 +17,22 @@ import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValue
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItemShapeParams
 import cszsm.dolgok.core.presentation.error.getMessage
 import cszsm.dolgok.forecast.domain.models.DailyForecast
+import cszsm.dolgok.forecast.presentation.ForecastScreenState
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 
 @Composable
 internal fun DailyForecastSection(
-    state: FetchedData<DailyForecast>,
+    state: ForecastScreenState.DailyForecastSectionState,
     selectedWeatherVariable: WeatherVariable,
 ) {
-    if (state.data == null) {
+    if (state.forecast.data == null) {
         when {
-            state.loading -> FullScreenLoading()
-            state.error != null -> FullScreenError(message = state.error!!.getMessage())
+            state.forecast.loading -> FullScreenLoading()
+            state.forecast.error != null -> FullScreenError(message = state.forecast.error!!.getMessage())
         }
     } else {
         DailyForecastList(
-            forecast = state.data!!,
+            forecast = state.forecast.data!!,
             selectedWeatherVariable = selectedWeatherVariable,
         )
     }
@@ -63,7 +63,7 @@ private fun DailyForecastList(
                     value = forecastValue,
                     shapeParams = SingleValueListItemShapeParams(
                         index = index,
-                        size = forecast.days.size
+                        size = forecast.days.size,
                     )
                 )
             }

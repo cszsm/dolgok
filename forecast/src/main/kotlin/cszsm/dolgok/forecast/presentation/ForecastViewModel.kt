@@ -2,23 +2,26 @@ package cszsm.dolgok.forecast.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cszsm.dolgok.core.domain.models.FetchedData
+import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreHourlyForecastAllowedUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 
 internal class ForecastViewModel(
     private val forecastRepository: ForecastRepository,
     private val fetchFirstDayHourlyForecastUseCase: FetchFirstDayHourlyForecastUseCase,
     private val fetchMoreHourlyForecastUseCase: FetchMoreHourlyForecastUseCase,
     private val fetchDailyForecastUseCase: FetchDailyForecastUseCase,
-    private val isMoreForecastAllowedUseCase: IsMoreForecastAllowedUseCase,
+    private val isMoreHourlyForecastAllowedUseCase: IsMoreHourlyForecastAllowedUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ForecastScreenState())
@@ -42,13 +45,29 @@ internal class ForecastViewModel(
     private fun collectForecasts() {
         viewModelScope.launch {
             forecastRepository.hourlyForecastStream.collect { hourlyForecast ->
-                _state.update { it.copy(hourlyForecast = hourlyForecast) }
+                val moreAllowed = hourlyForecast.lastLoadedForecastDateTime?.let {
+                    isMoreHourlyForecastAllowedUseCase(it)
+                } ?: true
+                _state.update {
+                    it.copy(
+                        hourlyForecastSectionState = it.hourlyForecastSectionState.copy(
+                            forecast = hourlyForecast,
+                            moreAllowed = moreAllowed,
+                        )
+                    )
+                }
             }
         }
 
         viewModelScope.launch {
             forecastRepository.dailyForecastStream.collect { dailyForecast ->
-                _state.update { it.copy(dailyForecast = dailyForecast) }
+                _state.update {
+                    it.copy(
+                        dailyForecastSectionState = it.dailyForecastSectionState.copy(
+                            forecast = dailyForecast
+                        )
+                    )
+                }
             }
         }
     }
@@ -69,10 +88,10 @@ internal class ForecastViewModel(
         }
         when (timeResolution) {
             TimeResolution.HOURLY ->
-                if (_state.value.hourlyForecast.data == null) fetchFirstDayHourlyForecast()
+                if (_state.value.hourlyForecastSectionState.forecast.data == null) fetchFirstDayHourlyForecast()
 
             TimeResolution.DAILY ->
-                if (_state.value.dailyForecast.data == null) fetchDailyForecast()
+                if (_state.value.dailyForecastSectionState.forecast.data == null) fetchDailyForecast()
         }
     }
 
@@ -92,9 +111,9 @@ internal class ForecastViewModel(
     }
 
     private fun fetchMoreHourlyForecast() {
+        if (!state.value.hourlyForecastSectionState.moreAllowed) return
         val lastLoadedDateTime =
-            state.value.hourlyForecast.data?.hours?.keys?.lastOrNull() ?: return
-        if (!isMoreForecastAllowedUseCase(lastLoadedForecastDateTime = lastLoadedDateTime)) return
+            state.value.hourlyForecastSectionState.forecast.lastLoadedForecastDateTime ?: return
 
         viewModelScope.launch {
             fetchMoreHourlyForecastUseCase(
@@ -106,9 +125,6 @@ internal class ForecastViewModel(
     }
 
     private fun fetchDailyForecast() {
-        _state.update {
-            it.copy(dailyForecast = it.dailyForecast.copy(loading = true))
-        }
         viewModelScope.launch {
             fetchDailyForecastUseCase(
                 latitude = LATITUDE,
@@ -116,6 +132,9 @@ internal class ForecastViewModel(
             )
         }
     }
+
+    private val FetchedData<HourlyForecast>.lastLoadedForecastDateTime: LocalDateTime?
+        get() = data?.hours?.keys?.lastOrNull()
 
     private companion object {
         const val LATITUDE: Float = 47.50f

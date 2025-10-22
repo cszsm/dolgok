@@ -7,7 +7,7 @@ import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreHourlyForecastAllowedUseCase
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -39,7 +39,7 @@ internal class ForecastViewModelTest {
     private val mockFetchMoreHourlyForecastUseCase: FetchMoreHourlyForecastUseCase =
         mockk(relaxed = true)
     private val mockFetchDailyForecastUseCase: FetchDailyForecastUseCase = mockk(relaxed = true)
-    private val mockIsMoreForecastAllowedUseCase: IsMoreForecastAllowedUseCase = mockk()
+    private val mockIsMoreHourlyForecastAllowedUseCase: IsMoreHourlyForecastAllowedUseCase = mockk()
 
     private lateinit var forecastViewModel: ForecastViewModel
 
@@ -177,11 +177,8 @@ internal class ForecastViewModelTest {
         // Given
         initForecastViewModel(
             hourlyForecast = FetchedData(HOURLY_FORECAST),
-            dailyForecast = FetchedData()
+            dailyForecast = FetchedData(),
         )
-        every {
-            mockIsMoreForecastAllowedUseCase(lastLoadedForecastDateTime = LOCAL_DATE_TIME)
-        } returns true
 
         // When
         forecastViewModel.onEvent(ForecastScreenEvent.HourlyForecastEndReach)
@@ -202,11 +199,9 @@ internal class ForecastViewModelTest {
         // Given
         initForecastViewModel(
             hourlyForecast = FetchedData(HOURLY_FORECAST),
-            dailyForecast = FetchedData()
+            dailyForecast = FetchedData(),
+            moreHourlyForecastAllowed = false,
         )
-        every {
-            mockIsMoreForecastAllowedUseCase(lastLoadedForecastDateTime = LOCAL_DATE_TIME)
-        } returns false
 
         // When
         forecastViewModel.onEvent(ForecastScreenEvent.HourlyForecastEndReach)
@@ -226,6 +221,7 @@ internal class ForecastViewModelTest {
     private fun TestScope.initForecastViewModel(
         hourlyForecast: FetchedData<HourlyForecast>,
         dailyForecast: FetchedData<DailyForecast>,
+        moreHourlyForecastAllowed: Boolean = true,
     ) {
         every {
             mockForecastRepository.hourlyForecastStream
@@ -233,13 +229,16 @@ internal class ForecastViewModelTest {
         every {
             mockForecastRepository.dailyForecastStream
         } returns MutableStateFlow(dailyForecast)
+        every {
+            mockIsMoreHourlyForecastAllowedUseCase(lastLoadedForecastDateTime = LOCAL_DATE_TIME)
+        } returns moreHourlyForecastAllowed
 
         forecastViewModel = ForecastViewModel(
             forecastRepository = mockForecastRepository,
             fetchFirstDayHourlyForecastUseCase = mockFetchFirstDayHourlyForecastUseCase,
             fetchMoreHourlyForecastUseCase = mockFetchMoreHourlyForecastUseCase,
             fetchDailyForecastUseCase = mockFetchDailyForecastUseCase,
-            isMoreForecastAllowedUseCase = mockIsMoreForecastAllowedUseCase,
+            isMoreHourlyForecastAllowedUseCase = mockIsMoreHourlyForecastAllowedUseCase,
         )
         advanceUntilIdle()
     }

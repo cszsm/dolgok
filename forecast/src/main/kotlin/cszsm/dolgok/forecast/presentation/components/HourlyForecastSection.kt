@@ -12,7 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import cszsm.dolgok.core.domain.models.FetchedData
+import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.asPressure
 import cszsm.dolgok.core.presentation.asRain
@@ -24,6 +24,7 @@ import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValue
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItemShapeParams
 import cszsm.dolgok.core.presentation.error.getMessage
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
+import cszsm.dolgok.forecast.presentation.ForecastScreenState
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 import cszsm.dolgok.localization.R
 import kotlinx.datetime.LocalTime
@@ -35,18 +36,20 @@ private const val KEY_DAY_TODAY = "today"
 
 @Composable
 internal fun HourlyForecastSection(
-    state: FetchedData<HourlyForecast>,
+    state: ForecastScreenState.HourlyForecastSectionState,
     selectedWeatherVariable: WeatherVariable,
     onEndReach: () -> Unit,
 ) {
-    if (state.data == null) {
+    if (state.forecast.data == null) {
         when {
-            state.loading -> FullScreenLoading()
-            state.error != null -> FullScreenError(message = state.error!!.getMessage())
+            state.forecast.loading -> FullScreenLoading()
+            state.forecast.error != null -> FullScreenError(message = state.forecast.error!!.getMessage())
         }
     } else {
         HourlyForecastList(
-            state = state,
+            forecast = state.forecast.data!!,
+            moreAllowed = state.moreAllowed,
+            error = state.forecast.error,
             selectedWeatherVariable = selectedWeatherVariable,
             onEndReach = onEndReach,
         )
@@ -55,11 +58,12 @@ internal fun HourlyForecastSection(
 
 @Composable
 private fun HourlyForecastList(
-    state: FetchedData<HourlyForecast>,
+    forecast: HourlyForecast,
+    moreAllowed: Boolean,
+    error: DataError?,
     selectedWeatherVariable: WeatherVariable,
     onEndReach: () -> Unit,
 ) {
-    val forecast = state.data ?: return
     val listState = rememberLazyListState()
 
     LaunchedEffect(listState.canScrollForward) {
@@ -71,7 +75,7 @@ private fun HourlyForecastList(
     LazyColumn(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(vertical = 12.dp),
+        contentPadding = PaddingValues(bottom = 12.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 12.dp),
@@ -114,8 +118,8 @@ private fun HourlyForecastList(
         }
 
         when {
-            state.loading -> item { Text(text = stringResource(R.string.core_loading)) }
-            state.error != null -> item { Text(text = state.error!!.getMessage()) }
+            error != null -> item { Text(text = error.getMessage()) }
+            moreAllowed -> item { Text(text = stringResource(R.string.core_loading)) }
         }
     }
 }

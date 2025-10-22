@@ -5,7 +5,7 @@ import cszsm.dolgok.core.util.plus
 import cszsm.dolgok.core.util.toLocalDateTime
 import kotlinx.datetime.LocalDateTime
 
-internal class IsMoreForecastAllowedUseCase(
+internal class IsMoreHourlyForecastAllowedUseCase(
     private val getCurrentTimeUseCase: GetCurrentTimeUseCase,
 ) {
 
