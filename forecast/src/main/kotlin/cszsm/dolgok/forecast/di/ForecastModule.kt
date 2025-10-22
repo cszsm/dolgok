@@ -10,7 +10,7 @@ import cszsm.dolgok.forecast.domain.usecases.CalculateNextDayIntervalUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchMoreHourlyForecastUseCase
-import cszsm.dolgok.forecast.domain.usecases.IsMoreForecastAllowedUseCase
+import cszsm.dolgok.forecast.domain.usecases.IsMoreHourlyForecastAllowedUseCase
 import cszsm.dolgok.forecast.presentation.ForecastViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -53,7 +53,7 @@ val forecastModule = module {
     singleOf(::FetchMoreHourlyForecastUseCase)
     singleOf(::FetchDailyForecastUseCase)
     singleOf(::CalculateNextDayIntervalUseCase)
-    singleOf(::IsMoreForecastAllowedUseCase)
+    singleOf(::IsMoreHourlyForecastAllowedUseCase)
     viewModelOf(::ForecastViewModel)
 }
 

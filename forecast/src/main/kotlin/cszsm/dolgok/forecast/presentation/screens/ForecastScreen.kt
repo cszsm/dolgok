@@ -23,7 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.domain.models.FetchedData
-import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.presentation.ForecastScreenEvent
 import cszsm.dolgok.forecast.presentation.ForecastScreenState
@@ -104,8 +103,8 @@ private fun ForecastContent(
             ) { index ->
                 ForecastPage(
                     selectedTimeResolution = timeResolutions[index],
-                    hourlyForecastState = state.hourlyForecast,
-                    dailyForecastState = state.dailyForecast,
+                    hourlyForecastSectionState = state.hourlyForecastSectionState,
+                    dailyForecastSectionState = state.dailyForecastSectionState,
                     selectedWeatherVariable = state.selectedWeatherVariable,
                     onHourlyForecastEndReach = { onEvent(ForecastScreenEvent.HourlyForecastEndReach) },
                 )
@@ -117,20 +116,20 @@ private fun ForecastContent(
 @Composable
 private fun ForecastPage(
     selectedTimeResolution: TimeResolution,
-    hourlyForecastState: FetchedData<HourlyForecast>,
-    dailyForecastState: FetchedData<DailyForecast>,
+    hourlyForecastSectionState: ForecastScreenState.HourlyForecastSectionState,
+    dailyForecastSectionState: ForecastScreenState.DailyForecastSectionState,
     selectedWeatherVariable: WeatherVariable,
     onHourlyForecastEndReach: () -> Unit,
 ) {
     when (selectedTimeResolution) {
         TimeResolution.HOURLY -> HourlyForecastSection(
-            state = hourlyForecastState,
+            state = hourlyForecastSectionState,
             selectedWeatherVariable = selectedWeatherVariable,
             onEndReach = onHourlyForecastEndReach,
         )
 
         TimeResolution.DAILY -> DailyForecastSection(
-            state = dailyForecastState,
+            state = dailyForecastSectionState,
             selectedWeatherVariable = selectedWeatherVariable,
         )
     }
@@ -171,7 +170,11 @@ private fun ForecastContent_Preview() {
         )
     )
     ForecastContent(
-        state = ForecastScreenState(hourlyForecast = FetchedData(data = hourlyForecast)),
+        state = ForecastScreenState(
+            hourlyForecastSectionState = ForecastScreenState.HourlyForecastSectionState(
+                forecast = FetchedData(data = hourlyForecast)
+            ),
+        ),
         onEvent = {},
     )
 }
