@@ -6,6 +6,7 @@ import cszsm.dolgok.forecast.data.models.HourlyForecastApiModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
 internal class WeatherDataSourceImpl(
@@ -31,11 +32,15 @@ internal class WeatherDataSourceImpl(
     override suspend fun getDailyForecast(
         latitude: Float,
         longitude: Float,
+        startDate: LocalDate,
+        endDate: LocalDate,
     ): DailyForecastApiModel =
         client.get(
             ForecastRequest(
                 latitude = latitude,
                 longitude = longitude,
+                start_date = startDate,
+                end_date = endDate,
                 daily = "temperature_2m_max,temperature_2m_min,rain_sum",
             )
         ).body()

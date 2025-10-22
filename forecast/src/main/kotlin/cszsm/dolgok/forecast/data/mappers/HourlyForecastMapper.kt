@@ -6,12 +6,15 @@ import kotlinx.datetime.LocalDateTime
 
 internal class HourlyForecastMapper {
 
-    fun map(input: HourlyForecastApiModel): HourlyForecast {
-        return input.hourly.map()
-    }
+    fun map(input: HourlyForecastApiModel) =
+        HourlyForecast(
+            hours = input.hourly.map(),
+            units = input.hourly_units.map(),
+        )
 
-    private fun HourlyForecastApiModel.Variables.map(): HourlyForecast {
-        val hours = buildMap {
+
+    private fun HourlyForecastApiModel.Variables.map() =
+        buildMap {
             time.forEachIndexed { index, time ->
                 val parsedTime = LocalDateTime.parse(time)
                 val forecastVariables = HourlyForecast.Variables(
@@ -22,6 +25,11 @@ internal class HourlyForecastMapper {
                 put(parsedTime, forecastVariables)
             }
         }
-        return HourlyForecast(hours = hours)
-    }
+
+    private fun HourlyForecastApiModel.Units.map() =
+        HourlyForecast.Units(
+            temperature = temperature_2m,
+            rain = rain,
+            pressure = surface_pressure,
+        )
 }

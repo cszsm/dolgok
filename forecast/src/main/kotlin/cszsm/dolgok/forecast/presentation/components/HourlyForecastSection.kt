@@ -14,9 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.domain.error.DataError
 import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
-import cszsm.dolgok.core.presentation.asPressure
-import cszsm.dolgok.core.presentation.asRain
-import cszsm.dolgok.core.presentation.asTemperature
 import cszsm.dolgok.core.presentation.components.error.FullScreenError
 import cszsm.dolgok.core.presentation.components.loading.FullScreenLoading
 import cszsm.dolgok.core.presentation.components.sectionheader.SectionHeader
@@ -91,10 +88,13 @@ private fun HourlyForecastList(
             val dateTime = entry.key
             val time = dateTime.time
             val variables = entry.value
-            val forecastValue = variables.getLabel(weatherVariable = selectedWeatherVariable)
+            val forecastValue = variables.getLabel(
+                units = forecast.units,
+                weatherVariable = selectedWeatherVariable,
+            )
 
             if (time == LocalTime(hour = 0, minute = 0)) {
-                val day = entry.key.asLocalizedDayOfWeek().lowercase()
+                val day = dateTime.asLocalizedDayOfWeek().lowercase()
                 item(key = day) {
                     SectionHeader(
                         text = day,
@@ -108,7 +108,8 @@ private fun HourlyForecastList(
                     title = time.toString(),
                     value = forecastValue,
                     shapeParams = SingleValueListItemShapeParams(
-                        index = index, size = forecast.hours.size,
+                        index = index,
+                        size = forecast.hours.size,
                         forcedTop = time == FIRST_HOUR_OF_THE_DAY,
                         forcedBottom = time == LAST_HOUR_OF_THE_DAY,
                     ),
@@ -125,9 +126,12 @@ private fun HourlyForecastList(
 }
 
 private fun HourlyForecast.Variables.getLabel(
+    units: HourlyForecast.Units,
     weatherVariable: WeatherVariable,
 ) = when (weatherVariable) {
-    WeatherVariable.TEMPERATURE -> temperature.asTemperature()
-    WeatherVariable.RAIN -> rain.asRain()
-    WeatherVariable.PRESSURE -> pressure.asPressure()
+    WeatherVariable.TEMPERATURE -> temperature.asLabel(units.temperature)
+    WeatherVariable.RAIN -> rain.asLabel(units.rain)
+    WeatherVariable.PRESSURE -> pressure.asLabel(units.pressure)
 }
+
+private fun Float.asLabel(unit: String) = "${"%.2f".format(this)} $unit"

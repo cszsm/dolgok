@@ -256,7 +256,12 @@ internal class ForecastViewModelTest {
                     rain = 0f,
                     pressure = 1001.4f,
                 )
-            )
+            ),
+            units = HourlyForecast.Units(
+                temperature = "${Typography.degree}C",
+                rain = "mm",
+                pressure = "hPa",
+            ),
         )
         val DAILY_FORECAST = DailyForecast(
             days = mapOf(
@@ -265,6 +270,11 @@ internal class ForecastViewModelTest {
                     temperatureMin = 4.8f,
                     rainSum = 0f,
                 )
+            ),
+            units = DailyForecast.Units(
+                temperatureMax = "${Typography.degree}C",
+                temperatureMin = "${Typography.degree}C",
+                rainSum = "mm",
             )
         )
     }

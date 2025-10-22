@@ -2,6 +2,7 @@ package cszsm.dolgok.forecast.data.repositories
 
 import android.util.Log
 import cszsm.dolgok.core.domain.error.DataError
+import cszsm.dolgok.core.domain.models.DateInterval
 import cszsm.dolgok.core.domain.models.DateTimeInterval
 import cszsm.dolgok.core.domain.models.FetchedData
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
@@ -23,6 +24,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.io.IOException
 import org.junit.jupiter.api.AfterEach
@@ -153,6 +155,8 @@ internal class ForecastRepositoryImplTest {
                 mockWeatherDataSource.getDailyForecast(
                     latitude = LATITUDE,
                     longitude = LONGITUDE,
+                    startDate = START_DATE,
+                    endDate = END_DATE,
                 )
             } returns DAILY_FORECAST_API_MODEL
             every {
@@ -163,6 +167,7 @@ internal class ForecastRepositoryImplTest {
             forecastRepositoryImpl.fetchDailyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
+                dateInterval = DateInterval(START_DATE, END_DATE),
             )
             advanceUntilIdle()
 
@@ -180,6 +185,8 @@ internal class ForecastRepositoryImplTest {
                 mockWeatherDataSource.getDailyForecast(
                     latitude = LATITUDE,
                     longitude = LONGITUDE,
+                    startDate = START_DATE,
+                    endDate = END_DATE,
                 )
             } throws IOException()
 
@@ -187,6 +194,7 @@ internal class ForecastRepositoryImplTest {
             forecastRepositoryImpl.fetchDailyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
+                dateInterval = DateInterval(START_DATE, END_DATE),
             )
             advanceUntilIdle()
 
@@ -204,6 +212,8 @@ internal class ForecastRepositoryImplTest {
                 mockWeatherDataSource.getDailyForecast(
                     latitude = LATITUDE,
                     longitude = LONGITUDE,
+                    startDate = START_DATE,
+                    endDate = END_DATE,
                 )
             } returns DAILY_FORECAST_API_MODEL
             every {
@@ -214,6 +224,7 @@ internal class ForecastRepositoryImplTest {
             forecastRepositoryImpl.fetchDailyForecast(
                 latitude = LATITUDE,
                 longitude = LONGITUDE,
+                dateInterval = DateInterval(START_DATE, END_DATE),
             )
             advanceUntilIdle()
 
@@ -228,6 +239,8 @@ internal class ForecastRepositoryImplTest {
         const val LONGITUDE = 19.04f
         val START_HOUR = LocalDateTime.parse("2025-06-27T13:00")
         val END_HOUR = LocalDateTime.parse("2025-06-28T12:00")
+        val START_DATE = LocalDate.parse("2025-10-22")
+        val END_DATE = LocalDate.parse("2025-10-27")
 
         val HOURLY_FORECAST_API_MODEL: HourlyForecastApiModel = mockk()
         val DAILY_FORECAST_API_MODEL: DailyForecastApiModel = mockk()

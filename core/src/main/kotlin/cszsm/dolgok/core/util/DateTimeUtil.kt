@@ -4,6 +4,7 @@ import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration
 
@@ -24,3 +25,8 @@ fun LocalDateTime.roundDownToHour() = LocalDateTime(
     second = 0,
     nanosecond = 0,
 )
+
+fun LocalDateTime.plus(hours: Int) = this
+    .toInstant(timeZone = TimeZone.currentSystemDefault())
+    .plus(hours = hours)
+    .toLocalDateTime()

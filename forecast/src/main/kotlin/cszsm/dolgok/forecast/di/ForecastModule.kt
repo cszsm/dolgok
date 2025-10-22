@@ -2,10 +2,12 @@ package cszsm.dolgok.forecast.di
 
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSourceImpl
+import cszsm.dolgok.forecast.data.datasources.mock.MockWeatherDataSource
 import cszsm.dolgok.forecast.data.mappers.DailyForecastMapper
 import cszsm.dolgok.forecast.data.mappers.HourlyForecastMapper
 import cszsm.dolgok.forecast.data.repositories.ForecastRepositoryImpl
 import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
+import cszsm.dolgok.forecast.domain.usecases.CalculateDailyForecastIntervalUseCase
 import cszsm.dolgok.forecast.domain.usecases.CalculateNextDayIntervalUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchDailyForecastUseCase
 import cszsm.dolgok.forecast.domain.usecases.FetchFirstDayHourlyForecastUseCase
@@ -33,18 +35,25 @@ import org.koin.dsl.module
 @Suppress("SpellCheckingInspection")
 private const val WEATHER_BASE_URL = "api.open-meteo.com/v1/"
 
+private const val MOCK_DATA = false
+
 val forecastModule = module {
     single<WeatherDataSource> {
-        WeatherDataSourceImpl(
-            client = HttpClient(OkHttp) {
-                common()
+        // TODO: do something more sophisticated, like depend on build environment
+        if (MOCK_DATA) {
+            MockWeatherDataSource()
+        } else {
+            WeatherDataSourceImpl(
+                client = HttpClient(OkHttp) {
+                    common()
 
-                defaultRequest {
-                    host = WEATHER_BASE_URL
-                    url { protocol = URLProtocol.HTTPS }
+                    defaultRequest {
+                        host = WEATHER_BASE_URL
+                        url { protocol = URLProtocol.HTTPS }
+                    }
                 }
-            }
-        )
+            )
+        }
     }
     single<ForecastRepository> { ForecastRepositoryImpl(get(), get(), get()) }
     singleOf(::HourlyForecastMapper)
@@ -53,6 +62,7 @@ val forecastModule = module {
     singleOf(::FetchMoreHourlyForecastUseCase)
     singleOf(::FetchDailyForecastUseCase)
     singleOf(::CalculateNextDayIntervalUseCase)
+    singleOf(::CalculateDailyForecastIntervalUseCase)
     singleOf(::IsMoreHourlyForecastAllowedUseCase)
     viewModelOf(::ForecastViewModel)
 }
