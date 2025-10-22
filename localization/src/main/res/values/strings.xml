@@ -11,6 +11,7 @@
     <string name="core_error_unknown">error: unknown error</string>
     <string name="core_error_wrong_data_format">error: wrong data format</string>
     <string name="core_loading">loading…</string>
+    <string name="forecast_next_week">next week</string>
     <string name="forecast_time_resolution_daily">Daily</string>
     <string name="forecast_time_resolution_hourly">Hourly</string>
     <string name="forecast_title">Forecast</string>

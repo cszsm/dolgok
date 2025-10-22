@@ -2,6 +2,7 @@ package cszsm.dolgok.forecast.data.repositories
 
 import android.util.Log
 import cszsm.dolgok.core.domain.error.DataError
+import cszsm.dolgok.core.domain.models.DateInterval
 import cszsm.dolgok.core.domain.models.DateTimeInterval
 import cszsm.dolgok.core.domain.models.FetchedData
 import cszsm.dolgok.forecast.data.datasources.WeatherDataSource
@@ -65,13 +66,19 @@ internal class ForecastRepositoryImpl(
         }
     }
 
-    override suspend fun fetchDailyForecast(latitude: Float, longitude: Float) {
+    override suspend fun fetchDailyForecast(
+        latitude: Float,
+        longitude: Float,
+        dateInterval: DateInterval,
+    ) {
         dailyForecastStream.update { it.copy(loading = true) }
 
         try {
             val dailyForecast = weatherDataSource.getDailyForecast(
                 latitude = latitude,
                 longitude = longitude,
+                startDate = dateInterval.start,
+                endDate = dateInterval.end,
             ).let(dailyForecastMapper::map)
 
             dailyForecastStream.update {
@@ -100,9 +107,7 @@ internal class ForecastRepositoryImpl(
     }
 
     private fun HourlyForecast.concatenate(other: HourlyForecast) =
-        HourlyForecast(
-            hours = this.hours + other.hours
-        )
+        copy(hours = this.hours + other.hours)
 
     private companion object {
         val TAG = ForecastRepositoryImpl::class.simpleName

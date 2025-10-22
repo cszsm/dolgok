@@ -6,12 +6,13 @@ import kotlinx.datetime.LocalDate
 
 internal class DailyForecastMapper {
 
-    fun map(input: DailyForecastApiModel): DailyForecast {
-        return input.daily.map()
-    }
+    fun map(input: DailyForecastApiModel) = DailyForecast(
+        days = input.daily.map(),
+        units = input.daily_units.map(),
+    )
 
-    private fun DailyForecastApiModel.Variables.map(): DailyForecast {
-        val days = buildMap {
+    private fun DailyForecastApiModel.Variables.map() =
+        buildMap {
             time.forEachIndexed { index, time ->
                 val parsedTime = LocalDate.parse(time)
                 val forecastVariables = DailyForecast.Variables(
@@ -22,6 +23,11 @@ internal class DailyForecastMapper {
                 put(parsedTime, forecastVariables)
             }
         }
-        return DailyForecast(days = days)
-    }
+
+    private fun DailyForecastApiModel.Units.map() =
+        DailyForecast.Units(
+            temperatureMax = temperature_2m_max,
+            temperatureMin = temperature_2m_min,
+            rainSum = rain_sum,
+        )
 }

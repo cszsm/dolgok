@@ -147,26 +147,31 @@ private fun ForecastContent_Preview() {
                     HourlyForecast.Variables(
                         temperature = 11.4f,
                         rain = 0f,
-                        pressure = 999.7f
+                        pressure = 999.7f,
                     ),
             getPreviewTime(dayOfMonth = 22, hour = 23) to
                     HourlyForecast.Variables(
                         temperature = 11.7f,
                         rain = 0f,
-                        pressure = 998.6f
+                        pressure = 998.6f,
                     ),
             getPreviewTime(dayOfMonth = 23, hour = 0) to
                     HourlyForecast.Variables(
                         temperature = 10.2f,
                         rain = 0.3f,
-                        pressure = 997f
+                        pressure = 997f,
                     ),
             getPreviewTime(dayOfMonth = 23, hour = 1) to
                     HourlyForecast.Variables(
                         temperature = 9.9f,
                         rain = 0.1f,
-                        pressure = 996.4f
+                        pressure = 996.4f,
                     ),
+        ),
+        units = HourlyForecast.Units(
+            temperature = "${Typography.degree}C",
+            rain = "mm",
+            pressure = "hPa",
         )
     )
     ForecastContent(

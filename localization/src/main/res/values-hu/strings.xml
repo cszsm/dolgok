@@ -11,6 +11,7 @@
     <string name="core_error_unknown">hiba: ismeretlen hiba</string>
     <string name="core_error_wrong_data_format">hiba: hibás adatformátum</string>
     <string name="core_loading">töltés…</string>
+    <string name="forecast_next_week">jövő hét</string>
     <string name="forecast_time_resolution_daily">Naponta</string>
     <string name="forecast_time_resolution_hourly">Óránként</string>
     <string name="forecast_title">Előrejelzés</string>
