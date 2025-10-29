@@ -5,7 +5,9 @@ import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 internal class FetchMoreHourlyForecastUseCase(
     private val calculateNextDayIntervalUseCase: CalculateNextDayIntervalUseCase,
     private val forecastRepository: ForecastRepository,

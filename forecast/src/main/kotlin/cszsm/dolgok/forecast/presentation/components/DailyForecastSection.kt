@@ -9,18 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.components.error.FullScreenError
 import cszsm.dolgok.core.presentation.components.loading.FullScreenLoading
 import cszsm.dolgok.core.presentation.components.sectionheader.SectionHeader
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItem
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItemShapeParams
+import cszsm.dolgok.core.presentation.displayName
 import cszsm.dolgok.core.presentation.error.getMessage
 import cszsm.dolgok.forecast.domain.models.DailyForecast
 import cszsm.dolgok.forecast.presentation.ForecastScreenState
 import cszsm.dolgok.forecast.presentation.WeatherVariable
 import cszsm.dolgok.localization.R
-import java.time.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 
 private const val KEY_NEXT_WEEK = "next_week"
 
@@ -58,7 +58,6 @@ private fun DailyForecastList(
             val date = day.key
             val variables = day.value
 
-            val dayOfWeek = date.asLocalizedDayOfWeek().lowercase()
             val forecastValue = variables.getLabel(
                 units = forecast.units,
                 weatherVariable = selectedWeatherVariable,
@@ -75,7 +74,7 @@ private fun DailyForecastList(
 
             item(key = date.toString()) {
                 SingleValueListItem(
-                    title = dayOfWeek,
+                    title = date.dayOfWeek.displayName().lowercase(),
                     value = forecastValue,
                     shapeParams = SingleValueListItemShapeParams(
                         index = index,

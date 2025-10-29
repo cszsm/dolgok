@@ -2,10 +2,12 @@ package cszsm.dolgok.core.domain.usecases
 
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.datetime.Clock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 internal class GetCurrentTimeUseCaseTest {
 
     private lateinit var getCurrentTimeUseCase: GetCurrentTimeUseCase

@@ -35,7 +35,7 @@ import org.koin.dsl.module
 @Suppress("SpellCheckingInspection")
 private const val WEATHER_BASE_URL = "api.open-meteo.com/v1/"
 
-private const val MOCK_DATA = false
+private const val MOCK_DATA = true
 
 val forecastModule = module {
     single<WeatherDataSource> {

@@ -5,8 +5,10 @@ import cszsm.dolgok.core.util.minus
 import cszsm.dolgok.core.util.plus
 import cszsm.dolgok.core.util.roundDownToHour
 import cszsm.dolgok.core.util.toLocalDateTime
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 internal class CalculateNextDayIntervalUseCase {
 
     operator fun invoke(

@@ -1,8 +1,10 @@
 package cszsm.dolgok.core.domain.usecases
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class GetCurrentTimeUseCase(
     private val clock: Clock,
 ) {

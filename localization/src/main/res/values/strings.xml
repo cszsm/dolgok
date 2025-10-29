@@ -11,6 +11,13 @@
     <string name="core_error_unknown">error: unknown error</string>
     <string name="core_error_wrong_data_format">error: wrong data format</string>
     <string name="core_loading">loading…</string>
+    <string name="core_week_monday">Monday</string>
+    <string name="core_week_tuesday">Tuesday</string>
+    <string name="core_week_wednesday">Wednesday</string>
+    <string name="core_week_thursday">Thursday</string>
+    <string name="core_week_friday">Friday</string>
+    <string name="core_week_saturday">Saturday</string>
+    <string name="core_week_sunday">Sunday</string>
     <string name="forecast_next_week">next week</string>
     <string name="forecast_time_resolution_daily">Daily</string>
     <string name="forecast_time_resolution_hourly">Hourly</string>

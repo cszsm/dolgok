@@ -8,7 +8,7 @@ import org.gradle.kotlin.dsl.withType
 
 internal fun Project.configureAndroid(extension: CommonExtension<*, *, *, *, *, *>) {
     extension.apply {
-        compileSdk = 35
+        compileSdk = 36
 
         defaultConfig {
             minSdk = 34
@@ -26,9 +26,6 @@ internal fun Project.configureAndroid(extension: CommonExtension<*, *, *, *, *, 
         }
         buildFeatures {
             compose = true
-        }
-        composeOptions {
-            kotlinCompilerExtensionVersion = "1.5.1"
         }
 
         tasks.withType<Test>().configureEach {

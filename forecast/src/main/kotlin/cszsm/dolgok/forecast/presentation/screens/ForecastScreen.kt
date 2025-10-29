@@ -135,33 +135,33 @@ private fun ForecastPage(
     }
 }
 
-private fun getPreviewTime(dayOfMonth: Int, hour: Int) =
-    LocalDateTime(year = 2025, monthNumber = 3, dayOfMonth = dayOfMonth, hour = hour, minute = 0)
+private fun getPreviewTime(day: Int, hour: Int) =
+    LocalDateTime(year = 2025, month = 3, day = day, hour = hour, minute = 0)
 
 @Preview
 @Composable
 private fun ForecastContent_Preview() {
     val hourlyForecast = HourlyForecast(
         hours = mapOf(
-            getPreviewTime(dayOfMonth = 22, hour = 22) to
+            getPreviewTime(day = 22, hour = 22) to
                     HourlyForecast.Variables(
                         temperature = 11.4f,
                         rain = 0f,
                         pressure = 999.7f,
                     ),
-            getPreviewTime(dayOfMonth = 22, hour = 23) to
+            getPreviewTime(day = 22, hour = 23) to
                     HourlyForecast.Variables(
                         temperature = 11.7f,
                         rain = 0f,
                         pressure = 998.6f,
                     ),
-            getPreviewTime(dayOfMonth = 23, hour = 0) to
+            getPreviewTime(day = 23, hour = 0) to
                     HourlyForecast.Variables(
                         temperature = 10.2f,
                         rain = 0.3f,
                         pressure = 997f,
                     ),
-            getPreviewTime(dayOfMonth = 23, hour = 1) to
+            getPreviewTime(day = 23, hour = 1) to
                     HourlyForecast.Variables(
                         temperature = 9.9f,
                         rain = 0.1f,
