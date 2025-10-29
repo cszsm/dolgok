@@ -2,7 +2,9 @@ package cszsm.dolgok.forecast.domain.usecases
 
 import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
 import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 internal class FetchFirstDayHourlyForecastUseCase(
     private val calculateNextDayIntervalUseCase: CalculateNextDayIntervalUseCase,
     private val getCurrentTimeUseCase: GetCurrentTimeUseCase,

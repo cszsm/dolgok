@@ -13,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cszsm.dolgok.core.domain.error.DataError
-import cszsm.dolgok.core.presentation.asLocalizedDayOfWeek
 import cszsm.dolgok.core.presentation.components.error.FullScreenError
 import cszsm.dolgok.core.presentation.components.loading.FullScreenLoading
 import cszsm.dolgok.core.presentation.components.sectionheader.SectionHeader
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItem
 import cszsm.dolgok.core.presentation.components.singlevaluelistitem.SingleValueListItemShapeParams
+import cszsm.dolgok.core.presentation.displayName
 import cszsm.dolgok.core.presentation.error.getMessage
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.presentation.ForecastScreenState
@@ -94,10 +94,9 @@ private fun HourlyForecastList(
             )
 
             if (time == LocalTime(hour = 0, minute = 0)) {
-                val day = dateTime.asLocalizedDayOfWeek().lowercase()
-                item(key = day) {
+                item(key = dateTime.dayOfWeek) {
                     SectionHeader(
-                        text = day,
+                        text = dateTime.dayOfWeek.displayName().lowercase(),
                         modifier = Modifier.animateItem(),
                     )
                 }

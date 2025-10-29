@@ -4,14 +4,16 @@ import cszsm.dolgok.core.domain.models.DateTimeInterval
 import cszsm.dolgok.core.domain.usecases.GetCurrentTimeUseCase
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 internal class CalculateNextDayIntervalUseCaseTest {
 
     private val mockGetCurrentTimeUseCase: GetCurrentTimeUseCase = mockk()

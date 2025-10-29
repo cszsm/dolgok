@@ -8,10 +8,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 internal class FetchFirstDayHourlyForecastUseCaseTest {
 
     private val mockCalculateNextDayIntervalUseCase: CalculateNextDayIntervalUseCase = mockk()
