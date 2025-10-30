@@ -28,4 +28,9 @@
     <string name="forecast_weather_variable_temperature">Hőmérséklet</string>
     <string name="home_option_forecast">Előrejelzés</string>
     <string name="home_option_animation">Animáció</string>
+    <string name="home_option_point_and_shoot">Point-and-shoot</string>
+    <string name="pointandshoot_1x">1x</string>
+    <string name="pointandshoot_35_mm">35 mm</string>
+    <string name="pointandshoot_accessibility_image_preview">kép előnézet</string>
+    <string name="pointandshoot_accessibility_shutter">kioldógomb</string>
 </resources>
