@@ -12,6 +12,8 @@ import cszsm.dolgok.forecast.presentation.navigation.ForecastGraphRoute
 import cszsm.dolgok.forecast.presentation.navigation.addForecastGraph
 import cszsm.dolgok.home.presentation.navigation.HomeGraphRoute
 import cszsm.dolgok.home.presentation.navigation.addHomeGraph
+import cszsm.dolgok.pointandshoot.presentation.navigation.PointAndShootGraphRoute
+import cszsm.dolgok.pointandshoot.presentation.navigation.addPointAndShootGraph
 
 class MainActivity : ComponentActivity() {
 
@@ -29,9 +31,11 @@ class MainActivity : ComponentActivity() {
                     addHomeGraph(
                         navigateToForecast = { navController.navigate(route = ForecastGraphRoute) },
                         navigateToAnimation = { navController.navigate(route = AnimationGraphRoute) },
+                        navigateToPointAndShoot = { navController.navigate(route = PointAndShootGraphRoute) },
                     )
                     addForecastGraph()
                     addAnimationGraph(navHostController = navController)
+                    addPointAndShootGraph()
                 }
             }
         }
