@@ -28,6 +28,7 @@
             <option value="$PROJECT_DIR$/forecast" />
             <option value="$PROJECT_DIR$/home" />
             <option value="$PROJECT_DIR$/localization" />
+            <option value="$PROJECT_DIR$/pointandshoot" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -13,4 +13,5 @@ dependencies {
     implementation(project(":home"))
     implementation(project(":forecast"))
     implementation(project(":animation"))
+    implementation(project(":pointandshoot"))
 }

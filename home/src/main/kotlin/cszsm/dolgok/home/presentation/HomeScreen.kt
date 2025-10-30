@@ -22,6 +22,7 @@ import cszsm.dolgok.localization.R
 internal fun HomeScreen(
     onNavigateToForecast: () -> Unit,
     onNavigateToAnimation: () -> Unit,
+    onNavigateToPointAndShoot: () -> Unit,
 ) {
     Scaffold { contentPadding ->
         Column(
@@ -44,6 +45,13 @@ internal fun HomeScreen(
             ) {
                 Text(text = stringResource(R.string.home_option_animation))
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onNavigateToPointAndShoot() },
+                modifier = Modifier.wrapContentSize()
+            ) {
+                Text(text = stringResource(R.string.home_option_point_and_shoot))
+            }
         }
     }
 }
@@ -54,5 +62,6 @@ fun HomeScreenPreview() {
     HomeScreen(
         onNavigateToForecast = {},
         onNavigateToAnimation = {},
+        onNavigateToPointAndShoot = {},
     )
 }

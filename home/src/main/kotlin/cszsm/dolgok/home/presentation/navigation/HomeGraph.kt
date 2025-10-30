@@ -15,6 +15,7 @@ private object HomeRoute
 fun NavGraphBuilder.addHomeGraph(
     navigateToForecast: () -> Unit,
     navigateToAnimation: () -> Unit,
+    navigateToPointAndShoot: () -> Unit,
 ) {
     navigation<HomeGraphRoute>(
         startDestination = HomeRoute,
@@ -23,6 +24,7 @@ fun NavGraphBuilder.addHomeGraph(
             HomeScreen(
                 onNavigateToForecast = navigateToForecast,
                 onNavigateToAnimation = navigateToAnimation,
+                onNavigateToPointAndShoot = navigateToPointAndShoot,
             )
         }
     }
