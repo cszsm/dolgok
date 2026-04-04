@@ -1,7 +1,9 @@
 package cszsm.dolgok.forecast.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cszsm.dolgok.core.data.managers.PermissionManager
 import cszsm.dolgok.core.domain.models.FetchedData
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.domain.repositories.ForecastRepository
@@ -22,6 +24,8 @@ internal class ForecastViewModel(
     private val fetchMoreHourlyForecastUseCase: FetchMoreHourlyForecastUseCase,
     private val fetchDailyForecastUseCase: FetchDailyForecastUseCase,
     private val isMoreHourlyForecastAllowedUseCase: IsMoreHourlyForecastAllowedUseCase,
+
+    private val permissionManager: PermissionManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ForecastScreenState())
@@ -29,6 +33,8 @@ internal class ForecastViewModel(
 
     init {
         collectForecasts()
+
+        Log.d("dolgok", "location: ${permissionManager.isLocationPermissionGranted()}")
     }
 
     fun onEvent(event: ForecastScreenEvent) {

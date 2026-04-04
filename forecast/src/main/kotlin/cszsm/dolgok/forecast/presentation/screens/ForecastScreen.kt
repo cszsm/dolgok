@@ -2,6 +2,12 @@
 
 package cszsm.dolgok.forecast.presentation.screens
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -17,12 +24,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cszsm.dolgok.core.domain.models.FetchedData
+import cszsm.dolgok.core.presentation.components.permission.PermissionRequestDialog
+import cszsm.dolgok.core.presentation.components.permission.PermissionRequestState
+import cszsm.dolgok.core.presentation.components.permission.PermissionStatus
 import cszsm.dolgok.forecast.domain.models.HourlyForecast
 import cszsm.dolgok.forecast.presentation.ForecastScreenEvent
 import cszsm.dolgok.forecast.presentation.ForecastScreenState
@@ -37,16 +50,84 @@ import cszsm.dolgok.localization.R
 import kotlinx.datetime.LocalDateTime
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ForecastScreen(
     viewModel: ForecastViewModel = koinViewModel(),
 ) {
+    val activity = LocalActivity.current // TODO: maybe return if null?
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ForecastContent(
-        state = state,
-        onEvent = viewModel::onEvent,
-    )
+    val permissionRequestState = remember { PermissionRequestState() }
+    val locationPermissionStatus = remember { mutableStateOf<PermissionStatus>(PermissionStatus.NotRequested) }
+    PermissionRequestDialog(
+        permission = Manifest.permission.ACCESS_COARSE_LOCATION,
+        state = permissionRequestState
+    ) { locationPermissionStatus.value = it}
+
+    LaunchedEffect(Unit) {
+        permissionRequestState.showDialog()
+    }
+
+    when (val status = locationPermissionStatus.value) {
+        PermissionStatus.NotRequested,
+        PermissionStatus.RequestInProgress,
+            -> Unit
+
+        PermissionStatus.Granted -> {
+            ForecastContent(
+                state = state,
+                onEvent = viewModel::onEvent,
+            )
+        }
+
+        is PermissionStatus.Denied -> {
+            if (status.shouldShowRationale) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Text("it's needed")
+                    Button(
+                        onClick = {
+//                            locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                            permissionRequestState.showDialog()
+                        }
+                    ) {
+                        Text("retry")
+                    }
+                }
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Text("it's really needed")
+                    Button(
+                        onClick = {
+                            activity?.startActivity(
+                                Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", activity.packageName, null)
+                                )
+                            )
+                        }
+                    ) {
+                        Text("goto settings")
+                    }
+                }
+            }
+        }
+    }
+
+//    BasicAlertDialog(
+//        onDismissRequest = {},
+//        ) {
+//        Text(text = "Location")
+//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
